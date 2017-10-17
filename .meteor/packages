@@ -1,6 +1,9 @@
 # see http://docs.vulcanjs.org/packages
 
 vulcan:core
+vulcan:forms
+vulcan:routing
+vulcan:users
 
 ############ Language Packages ############
 
@@ -14,12 +17,6 @@ accounts-password@1.4.0
 
 ############ Your Packages ############
 
-example-simple
+# yourpublic-movies
 # example-movies
-# example-instagram
-# example-forum
-# example-customization
-# example-permissions
-# example-membership
-# example-interfaces
-# example-reactions
+example-forum
