@@ -1,5 +1,5 @@
 # Specify where things should go
-export NEW_PROJECT_NAME="YourPublic";                # a name for your new project
+export NEW_PROJECT_NAME="VStart";                # a name for your new project
 export PROJECTS_DIRECTORY="${HOME}/projects";      # the installation path for your new project
 export VULCAN_HOME="${PROJECTS_DIRECTORY}/Vulcan"; # the path to the root of your Vulcan installation
 
@@ -48,7 +48,7 @@ pushd ${PROJECTS_DIRECTORY};
   popd;
 
 # Clone Vulcan starter kit as your named project
-git clone git@github.com:FleetingClouds/YourPublic.git ${NEW_PROJECT_NAME};
+git clone git@github.com:VulcanJS/Vulcan-Starter.git ${NEW_PROJECT_NAME};
 
   # Step in your project folder
   pushd ${NEW_PROJECT_NAME};
@@ -60,15 +60,27 @@ git clone git@github.com:FleetingClouds/YourPublic.git ${NEW_PROJECT_NAME};
     # meteor npm install --save cross-fetch;
     meteor npm install;
 
-    # Tell Meteor to refer to the Vulcan sister folder for packages that Vulcan supplies
-    export METEOR_PACKAGE_DIRS=../Vulcan/packages;
-    echo "Vulcan's Meteor packages folder : ${METEOR_PACKAGE_DIRS}.";
+    # Make a startup environment variable that tells Meteor to refer
+    # to the Vulcan folder for packages that Vulcan supplies
+    export PKGDIRVARKEY="METEOR_PACKAGE_DIRS";
+    export PKGDIRVARVAL="export METEOR_PACKAGE_DIRS=${VULCAN_HOME}/packages;";
+    export PROFILE=${HOME}/.profile;
+    grep "${PKGDIRVARKEY}" ${PROFILE} >/dev//null \
+      && sed -i "\|${PKGDIRVARKEY}|c${PKGDIRVARVAL}" ${PROFILE} \
+      || echo "${PKGDIRVARVAL}" >> ${PROFILE};
+
+    # Confirm the setting was added to ~/.profile
+    grep -C 2 "${PKGDIRVARKEY}" ${PROFILE};
 
     # Run your Vulcan project
     [ -f settings.json ] || cp sample_settings.json settings.json;
     echo -e "Now you can run :
 
+       source ${PROFILE};
+       cd ${PROJECTS_DIRECTORY}/${NEW_PROJECT_NAME};
+       echo -e \"Starting app with packages from '\${METEOR_PACKAGE_DIRS}'\";
        meteor --port 3000 --settings settings.json;
     ";
   popd;
 popd;
+
