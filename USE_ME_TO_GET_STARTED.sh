@@ -53,13 +53,6 @@ git clone git@github.com:FleetingClouds/YourPublic.git ${NEW_PROJECT_NAME};
   # Step in your project folder
   pushd ${NEW_PROJECT_NAME};
 
-    git remote add upstream git@github.com:martinhbramwell/Vulcan-Starter.git;
-    git fetch upstream;
-    git pull upstream e2e;
-
-    # Switch to e2e
-    git checkout e2e;
-
     # Make sure your app uses the same Meteor release as Vulcan
     cp ${VULCAN_HOME}/.meteor/release ./.meteor;
 
