@@ -22,6 +22,8 @@
   "defaultEmail": "hello@world.com",
   "mailUrl": "smtp://username%40yourdomain.mailgun.org:yourpassword123@smtp.mailgun.org:587/",
 
+  "deploymentParametersIndexFile": "${HOME}/.vulcan/index.json",
+
   "oAuth": {
     "twitter": {
       "consumerKey": "foo",
