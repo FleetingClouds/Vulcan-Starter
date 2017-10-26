@@ -56,11 +56,6 @@ function setupTargetServer() {
     "${VHOST_SECRETS_PATH}" \
     "${ENVIRONMENT}";
 
-  pwd;
-  echo -e "||||||||||||| C U R T A I L E D ||||||||||  ${PROJECTPATH}  |||||";
-  exit;
-
-ssh -t -oStrictHostKeyChecking=no -oBatchMode=yes -l "${DEPLOY_USER}" "${TARGET_SRVR}" whoami;
 echo -e "${PRETTY}Tested '${DEPLOY_USER}' user SSH to host '${TARGET_SRVR}'.";
 echo -e "${PRETTY} Idempotency command throws error on first run ...";
 ssh ${DEPLOY_USER}@${TARGET_SRVR} ". ~/.nvm/nvm.sh && nvm use --delete-prefix v4.8.3 --silent";
@@ -79,16 +74,14 @@ echo -e "
 
 
 ||||||||||||||||||||||||||||||||||||||||||||||";
-ssh ${DEPLOY_USER}@${TARGET_SRVR} ". ~/.bash_login && ~/DeploymentPkgInstallerScripts/DeploymentPackageRunner.sh";
+# ssh ${DEPLOY_USER}@${TARGET_SRVR} ". ~/.bash_login && ~/DeploymentPkgInstallerScripts/DeploymentPackageRunner.sh";
 
-echo -e "||||||||||||||||||||||||||||||||||||||||||||||";
-exit;
 echo -e "      ** Done **
 
-ssh ${DEPLOY_USER}@${TARGET_SRVR} \". .bash_login && sudo -A journalctl -n 1000 -fb -u ${YOUR_ORG}_${YOUR_PKG}.service\";
-ssh ${DEPLOY_USER}@${TARGET_SRVR} \". .bash_login && sudo -A systemctl stop ${YOUR_ORG}_${YOUR_PKG}.service\";
-
+ssh ${DEPLOY_USER}@${TARGET_SRVR} \". .bash_login && sudo -A journalctl -n 1000 -fb\";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+exit;
+
 echo -e "${PRETTY} SOURCE_CERTS_DIR : ${SOURCE_CERTS_DIR}.";
 echo -e "${PRETTY} VHOST_SUBJECT : ${VHOST_SUBJECT}.";
 echo -e "${PRETTY} VHOST_CERT_PASSPHRASE : ${VHOST_CERT_PASSPHRASE}.";
@@ -117,50 +110,76 @@ function collectDeploymentParameters() {
   echo -e "#!/usr/bin/env bash\n# Target server env vars" > ${ENVIRONMENT};
 
   getParmFromJSON ".deploymentParametersIndexFile"  "PARMSFILE" "settings.json";
-  echo "PARMSFILE => ${PARMSFILE}" ;
+  echo "export PARMSFILE=${PARMSFILE}" ;
   getParmFromJSON ".standard.SSH_PATH" "SSH_PATH" "${PARMSFILE}";
-  echo "SSH_PATH => ${SSH_PATH}";
+  echo "export SSH_PATH=${SSH_PATH}";
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].TARGET_SRVR" "TARGET_SRVR" "${PARMSFILE}";
-  echo "TARGET_SRVR => ${TARGET_SRVR}";
+  echo "export TARGET_SRVR=${TARGET_SRVR}";
+
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER" "DEPLOY_USER" "${PARMSFILE}";
-  echo "DEPLOY_USER => ${DEPLOY_USER}";
+  echo "export DEPLOY_USER='${DEPLOY_USER}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].RDBMS_ROLE" "RDBMS_ROLE" "${PARMSFILE}";
+  echo "export RDBMS_ROLE='${RDBMS_ROLE}';" | tee -a ${ENVIRONMENT};
+
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER_SSH_KEY_COMMENT" "DEPLOY_USER_SSH_KEY_COMMENT" "${PARMSFILE}";
-  echo "DEPLOY_USER_SSH_KEY_COMMENT => ${DEPLOY_USER_SSH_KEY_COMMENT}";
+  echo "export DEPLOY_USER_SSH_KEY_COMMENT=${DEPLOY_USER_SSH_KEY_COMMENT}";
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].SETUP_USER_UID" "SETUP_USER_UID" "${PARMSFILE}";
-  echo "SETUP_USER_UID => ${SETUP_USER_UID}";
+  echo "export SETUP_USER_UID=${SETUP_USER_UID}";
 
   getParmFromJSON ".standard.SECRETS_PATH" "SECRETS_PATH" "${PARMSFILE}";
-  echo "SECRETS_PATH => ${SECRETS_PATH}";
+  echo "export SECRETS_PATH=${SECRETS_PATH}";
 
   getParmFromJSON ".standard.DEPLOY_USER_SECRETS_DIR" "DEPLOY_USER_SECRETS_DIR" "${PARMSFILE}";
-  echo "DEPLOY_USER_SECRETS_DIR => ${DEPLOY_USER_SECRETS_DIR}";
+  echo "export DEPLOY_USER_SECRETS_DIR=${DEPLOY_USER_SECRETS_DIR}";
 
   getParmFromJSON ".standard.VHOST_SECRETS_PATH" "VHOST_SECRETS_PATH" "${PARMSFILE}";
-  echo "VHOST_SECRETS_PATH => ${VHOST_SECRETS_PATH}";
+  echo "export VHOST_SECRETS_PATH=${VHOST_SECRETS_PATH}";
 
   getParmFromJSON ".standard.DEPLOY_USER_SECRETS_PATH" "DEPLOY_USER_SECRETS_PATH" "${PARMSFILE}";
-  echo "DEPLOY_USER_SECRETS_PATH => ${DEPLOY_USER_SECRETS_PATH}";
+  echo "export DEPLOY_USER_SECRETS_PATH=${DEPLOY_USER_SECRETS_PATH}";
 
   getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PATH" "DEPLOY_USER_SSH_KEY_PATH" "${PARMSFILE}";
-  echo "DEPLOY_USER_SSH_KEY_PATH => ${DEPLOY_USER_SSH_KEY_PATH}";
+  echo "export DEPLOY_USER_SSH_KEY_PATH=${DEPLOY_USER_SSH_KEY_PATH}";
 
   getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_FILE" "DEPLOY_USER_SSH_KEY_FILE" "${PARMSFILE}";
-  echo "DEPLOY_USER_SSH_KEY_FILE => ${DEPLOY_USER_SSH_KEY_FILE}";
+  echo "export DEPLOY_USER_SSH_KEY_FILE=${DEPLOY_USER_SSH_KEY_FILE}";
 
   getParmFromJSON ".standard.VHOST_SECRETS_FILE" "VHOST_SECRETS_FILE" "${PARMSFILE}";
-  echo "VHOST_SECRETS_FILE => ${VHOST_SECRETS_FILE}";
+  echo "export VHOST_SECRETS_FILE=${VHOST_SECRETS_FILE}";
 
   getParmFromJSON ".standard.YOUR_TARGET_SRVR_SSH_KEY_FILE" "YOUR_TARGET_SRVR_SSH_KEY_FILE" "${PARMSFILE}";
-  echo "YOUR_TARGET_SRVR_SSH_KEY_FILE => ${YOUR_TARGET_SRVR_SSH_KEY_FILE}";
+  echo "export YOUR_TARGET_SRVR_SSH_KEY_FILE=${YOUR_TARGET_SRVR_SSH_KEY_FILE}";
 
   getParmFromJSON ".DEPLOY_USER_SSH_PASS_PHRASE" "DEPLOY_USER_SSH_PASS_PHRASE" "${VHOST_SECRETS_FILE}";
-  echo "DEPLOY_USER_SSH_PASS_PHRASE => ${DEPLOY_USER_SSH_PASS_PHRASE}";
+  echo "export DEPLOY_USER_SSH_PASS_PHRASE=${DEPLOY_USER_SSH_PASS_PHRASE}";
+
+  getParmFromJSON ".SETUP_USER_PWD" "SETUP_USER_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export SETUP_USER_PWD=${SETUP_USER_PWD}";
+
+  getParmFromJSON ".DEPLOY_USER_PWD" "DEPLOY_USER_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export DEPLOY_USER_PWD=${DEPLOY_USER_PWD}";
+
+  getParmFromJSON ".NOSQLDB_PWD" "NOSQLDB_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export NOSQLDB_PWD=${NOSQLDB_PWD}";
+
+  getParmFromJSON ".RDBMS_PWD" "RDBMS_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export RDBMS_PWD=${RDBMS_PWD}";
+
+  getParmFromJSON ".RDBMS_ADMIN_PWD" "RDBMS_ADMIN_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export RDBMS_ADMIN_PWD=${RDBMS_ADMIN_PWD}";
+
+  getParmFromJSON ".NOSQLDB_ADMIN_PWD" "NOSQLDB_ADMIN_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export NOSQLDB_ADMIN_PWD=${NOSQLDB_ADMIN_PWD}";
 
   getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
-  echo "SSH_CONF_FILE => ${SSH_CONF_FILE}";
+  echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
+
+  getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
+  echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
 
   getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
-  echo "DEPLOY_USER_SSH_KEY_PUBL => ${DEPLOY_USER_SSH_KEY_PUBL}";
+  echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
 
 
    echo -e "----
@@ -201,11 +220,12 @@ function PrepareServer () {
 
   cp ${PARMSFILE} ${deployParmsFile};
   cp .scripts/target/PushInstallerScriptsToTarget.sh ${DEPLOY_DIR};
-  cp .scripts/target/host_scripts ${DEPLOY_DIR};
+  cp -r .scripts/target/host_scripts ${DEPLOY_DIR};
+
 
   pushd ${WORKDIR} &>/dev/null;
 
-    setupTargetServer;
+   setupTargetServer;
 
   popd &>/dev/null;
 

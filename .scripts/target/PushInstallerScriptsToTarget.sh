@@ -142,7 +142,6 @@ SCRIPTPATH=$(dirname "$SCRIPT");
 echo -e "\n${PRTY} Changing working location to ${SCRIPTPATH}.";
 cd ${SCRIPTPATH};
 
-
 # . ./admin_utils.sh;
 # . ./utils.sh;
 
@@ -158,7 +157,7 @@ SOURCE_SECRETS_DIR=${3};
 ENVIRONMENT=${4};
 
 DH_PARAMS_DIR="${SOURCE_SECRETS_DIR}/dh";
-SOURCE_SECRETS_FILE="${SOURCE_SECRETS_DIR}/secrets.sh";
+SOURCE_SECRETS_FILE="${SOURCE_SECRETS_DIR}/secrets.json";
 
 
 PASSWORD_MINIMUM_LENGTH=4;
@@ -188,7 +187,8 @@ echo -e "${PRTY} DH_PARAMS_DIR=${DH_PARAMS_DIR}";
 echo -e "${PRTY} Testing secrets directory existence ... [   ls \"${SOURCE_SECRETS_DIR}\"  ]";
 if [[ "X${SOURCE_SECRETS_DIR}X" = "XX" ]]; then errorNoSecretsDirSpecified "null"; fi;
 if [ ! -f "${SOURCE_SECRETS_FILE}" ]; then errorNoSecretsDirSpecified "${SOURCE_SECRETS_FILE}"; fi;
-source ${SOURCE_SECRETS_FILE};
+echo -e "### FIXME must get all secrets from /dev/shm etc...";
+# source ${SOURCE_SECRETS_FILE};
 
 # ----------------
 echo -e "${PRTY} Testing environment vars file availability... [   ls \"${ENVIRONMENT}\"  ]";
@@ -267,7 +267,6 @@ ssh-keygen -lvf ${DEPLOY_USER_SSH_KEY_PUBL} > /tmp/kyfp.txt || errorBadPathToSSH
 echo -e "${PRTY} Target's user's SSH key fingerprint...";
 cat /tmp/kyfp.txt;
 
-
 BUNDLING_DIRECTORY="${WORKDIR}";
 BUNDLE_DIRECTORY_NAME="DeploymentPkgInstallerScripts";
 BUNDLE_DIRECTORY="${BUNDLING_DIRECTORY}/${BUNDLE_DIRECTORY_NAME}";
@@ -289,17 +288,10 @@ echo -e "${PRTY} Inserting scripts, variables, secrets and keys into, '${BUNDLE_
 echo mkdir -p ${BUNDLED_SECRETS};
 echo ${HOST_SCRIPTS};
 
-
-  set +e;
-  pwd;
-  echo -e "||||||||||||| C U R T A I L E D ||||||||||  ${SCRIPTPATH}  |||||";
-  exit;
-
-
 mkdir -p ${BUNDLED_SECRETS};
 cp -rp ${HOST_SCRIPTS}/* ${BUNDLE_DIRECTORY};
 
-source ${ENVIRONMENT};
+# source ${ENVIRONMENT}; # FIXME > !!!  NO LONGER USE secrets.sh  !!!
 
 export LETS_ENCYPT="${HOME}/.ssh/deploy_vault/${VIRTUAL_HOST_DOMAIN_NAME}/letsencrypt.tar.gz";
 pushd ${BUNDLING_DIRECTORY} >/dev/null;
@@ -316,6 +308,17 @@ pushd ${BUNDLING_DIRECTORY} >/dev/null;
     chmod 770 ${SOURCE_SECRETS_DIR};
     cp -pr ${SOURCE_SECRETS_DIR}/. ${BUNDLED_SECRETS};
     rm -f ${BUNDLED_SECRETS}/deploy_user/id_rsa;
+    rm -f ${BUNDLED_SECRETS}/secrets.*;
+    rm -f ${BUNDLED_SECRETS}/doInit*;
+    rm -fr ${BUNDLED_SECRETS}/init;
+
+    echo " #  Passwords # " > ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export DEPLOY_USER_SSH_PASS_PHRASE='${DEPLOY_USER_SSH_PASS_PHRASE}';" >> ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export DEPLOY_USER_PWD='${DEPLOY_USER_PWD}';" >> ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export RDBMS_PWD='${RDBMS_PWD}';" >> ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export NOSQLDB_ADMIN_PWD='${NOSQLDB_ADMIN_PWD}';" >> ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export RDBMS_ADMIN_PWD='${RDBMS_ADMIN_PWD}';" >> ${BUNDLED_SECRETS}/secrets.sh;
+    echo "export NOSQLDB_PWD='${NOSQLDB_PWD}';" >> ${BUNDLED_SECRETS}/secrets.sh;
 
   popd >/dev/null;
 
@@ -341,8 +344,8 @@ echo -e "${PRTY} Decompressing the bundle...";
 ssh ${SETUP_USER_UID}@${TARGET_SRVR} tar zxf ${BUNDLE_NAME} --transform "s/target/${BUNDLE_DIRECTORY_NAME}/" >/dev/null || errorUnexpectedRPCResult;
 
 echo -e "${PRTY} Setting up SUDO_ASK_PASS on the target...";
-# echo "scp ./target/askPassMaker.sh ${SETUP_USER_UID}@${TARGET_SRVR}:~ >/dev/null || errorUnexpectedRPCResult;";
-scp ./target/askPassMaker.sh ${SETUP_USER_UID}@${TARGET_SRVR}:~ >/dev/null || errorUnexpectedRPCResult;
+echo "scp ./target/askPassMaker.sh ${SETUP_USER_UID}@${TARGET_SRVR}:~ >/dev/null || errorUnexpectedRPCResult;";
+scp ./host_scripts/askPassMaker.sh ${SETUP_USER_UID}@${TARGET_SRVR}:~ >/dev/null || errorUnexpectedRPCResult;
 # echo "ssh ${SETUP_USER_UID}@${TARGET_SRVR} \"source askPassMaker.sh; makeAskPassService '${SETUP_USER_UID}' '${SETUP_USER_PWD}';\" >/dev/null || errorUnexpectedRPCResult;";
 ssh ${SETUP_USER_UID}@${TARGET_SRVR} "source askPassMaker.sh; makeAskPassService '${SETUP_USER_UID}' '${SETUP_USER_PWD}';"
 # >/dev/null || errorUnexpectedRPCResult;
@@ -354,7 +357,7 @@ ssh ${SETUP_USER_UID}@${TARGET_SRVR} ". .bash_login && ./${BUNDLE_DIRECTORY_NAME
 
 # -------------------
 if ! ssh-add -l | grep "${DEPLOY_USER_SSH_KEY_PUBL%.pub}" &>/dev/null; then
-  echo -e "${PRTY} Adding 'hab' user SSH key passphrase to ssh-agent";
+  echo -e "${PRTY} Adding deploy_user SSH key passphrase to ssh-agent";
   startSSHAgent;
   expect << EOF
     spawn ssh-add ${DEPLOY_USER_SSH_KEY_PUBL%.pub}
@@ -365,7 +368,7 @@ EOF
 fi;
 
 echo -e "${PRETTY}Pushed installer scripts to host :: '${TARGET_SRVR}'.";
-# ----------------------
+# -----------------------
 echo -e "${PRTY} Testing SSH connection using... [   ssh ${DEPLOY_USER}@${TARGET_SRVR} 'whoami';  ]";
 if [[ "X${DEPLOY_USER}X" = "XX" ]]; then errorNoUserAccountSpecified "null"; fi;
 REMOTE_USER=$(ssh -qt -oBatchMode=yes -l ${DEPLOY_USER} ${TARGET_SRVR} whoami) || errorCannotCallRemoteProcedure "${DEPLOY_USER}@${TARGET_SRVR}";
@@ -373,11 +376,10 @@ REMOTE_USER=$(ssh -qt -oBatchMode=yes -l ${DEPLOY_USER} ${TARGET_SRVR} whoami) |
 
 if [[ "${NON_STOP}" = "YES" ]]; then exit 0; fi;
 
-
 echo -e "\n${PRTY} All files have been pushed to target server.
 Exiting '${PRTY}' ...
 $(date);
 Done.
-.  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+.  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . ${REMOTE_USER}
 ";
 exit 0;

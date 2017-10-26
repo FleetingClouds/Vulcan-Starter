@@ -9,7 +9,6 @@ function makeSSH_Config_File() {
   chmod ugo-w ${SSH_CONF_FILE}_BK;
 
 }
-#
 
 function addSSH_Config_Identity() {
   USER_ID=${1};
