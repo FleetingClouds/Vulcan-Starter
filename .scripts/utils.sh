@@ -102,9 +102,137 @@ function getParmFromJSON() {
   # RESULT  => ${RESULT}";
                 # echo "export ${RETURN_VAR}=\$(jq ${PARM} -rMc ${PARMS_FILE_PATH})";
               #  eval "export ${RETURN_VAR}=$(jq ${PARM} -rMc ${PARMS_FILE_PATH})";
-  echo "export ${RETURN_VAR}=\"${RESULT}\"";
+  # echo "export ${RETURN_VAR}=\"${RESULT}\"";
   eval "export ${RETURN_VAR}=\"${RESULT}\"";
 }
+
+
+function collectProvisioningParameters() {
+
+  cp ${PROJECTPATH}/sample_settings.json ${PROJECTPATH}/settings.json;
+  echo -e "# Target server provisioning env vars" >> ${ENVIRONMENT};
+
+  getParmFromJSON ".deploymentParametersIndexFile"  "PARMSFILE" "settings.json";
+  echo "export PARMSFILE=${PARMSFILE}" ;
+
+  getParmFromJSON ".standard.SSH_PATH" "SSH_PATH" "${PARMSFILE}";
+  echo "export SSH_PATH=${SSH_PATH}";
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].TARGET_SRVR" "TARGET_SRVR" "${PARMSFILE}";
+  echo "export TARGET_SRVR=${TARGET_SRVR}";
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER" "DEPLOY_USER" "${PARMSFILE}";
+  echo "export DEPLOY_USER='${PRTYDPLY}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].RDBMS_ROLE" "RDBMS_ROLE" "${PARMSFILE}";
+  echo "export RDBMS_ROLE='${RDBMS_ROLE}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER_SSH_KEY_COMMENT" "DEPLOY_USER_SSH_KEY_COMMENT" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_COMMENT=${DEPLOY_USER_SSH_KEY_COMMENT}";
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].SETUP_USER_UID" "SETUP_USER_UID" "${PARMSFILE}";
+  echo "export SETUP_USER_UID=${SETUP_USER_UID}";
+
+  getParmFromJSON ".standard.SECRETS_PATH" "SECRETS_PATH" "${PARMSFILE}";
+  echo "export SECRETS_PATH=${SECRETS_PATH}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SECRETS_DIR" "DEPLOY_USER_SECRETS_DIR" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SECRETS_DIR=${DEPLOY_USER_SECRETS_DIR}";
+
+  getParmFromJSON ".standard.VHOST_SECRETS_PATH" "VHOST_SECRETS_PATH" "${PARMSFILE}";
+  echo "export VHOST_SECRETS_PATH=${VHOST_SECRETS_PATH}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SECRETS_PATH" "DEPLOY_USER_SECRETS_PATH" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SECRETS_PATH=${DEPLOY_USER_SECRETS_PATH}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PATH" "DEPLOY_USER_SSH_KEY_PATH" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_PATH=${DEPLOY_USER_SSH_KEY_PATH}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_FILE" "DEPLOY_USER_SSH_KEY_FILE" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_FILE=${DEPLOY_USER_SSH_KEY_FILE}";
+
+  getParmFromJSON ".standard.VHOST_SECRETS_FILE" "VHOST_SECRETS_FILE" "${PARMSFILE}";
+  echo "export VHOST_SECRETS_FILE=${VHOST_SECRETS_FILE}";
+
+  getParmFromJSON ".standard.YOUR_TARGET_SRVR_SSH_KEY_FILE" "YOUR_TARGET_SRVR_SSH_KEY_FILE" "${PARMSFILE}";
+  echo "export YOUR_TARGET_SRVR_SSH_KEY_FILE=${YOUR_TARGET_SRVR_SSH_KEY_FILE}";
+
+  getParmFromJSON ".DEPLOY_USER_SSH_PASS_PHRASE" "DEPLOY_USER_SSH_PASS_PHRASE" "${VHOST_SECRETS_FILE}";
+  echo "export DEPLOY_USER_SSH_PASS_PHRASE=${DEPLOY_USER_SSH_PASS_PHRASE}";
+
+  getParmFromJSON ".SETUP_USER_PWD" "SETUP_USER_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export SETUP_USER_PWD=${SETUP_USER_PWD}";
+
+  getParmFromJSON ".DEPLOY_USER_PWD" "DEPLOY_USER_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export DEPLOY_USER_PWD=${DEPLOY_USER_PWD}";
+
+  getParmFromJSON ".NOSQLDB_PWD" "NOSQLDB_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export NOSQLDB_PWD=${NOSQLDB_PWD}";
+
+  getParmFromJSON ".RDBMS_PWD" "RDBMS_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export RDBMS_PWD=${RDBMS_PWD}";
+
+  getParmFromJSON ".RDBMS_ADMIN_PWD" "RDBMS_ADMIN_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export RDBMS_ADMIN_PWD=${RDBMS_ADMIN_PWD}";
+
+  getParmFromJSON ".NOSQLDB_ADMIN_PWD" "NOSQLDB_ADMIN_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export NOSQLDB_ADMIN_PWD=${NOSQLDB_ADMIN_PWD}";
+
+  getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
+  echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
+
+  getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
+  echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
+
+
+   echo -e "----
+       ${DEPLOY_USER_SSH_KEY_COMMENT}
+       ${DEPLOY_USER_SSH_PASS_PHRASE}
+       ${DEPLOY_USER_SSH_KEY_PATH}
+       ${DEPLOY_USER_SSH_KEY_FILE}
+     -----";
+
+};
+
+
+
+function collectDeploymentParameters() {
+
+  echo -e "\n#\n# Target server deployment parameters" >> ${ENVIRONMENT};
+
+  getParmFromJSON ".deploymentParametersIndexFile"  "PARMSFILE" "settings.json";
+  echo "export PARMSFILE=${PARMSFILE}" ;
+
+  getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
+
+  getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
+  echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].YOUR_FULLNAME" "YOUR_FULLNAME" "${PARMSFILE}";
+  echo "export YOUR_FULLNAME=${YOUR_FULLNAME}";
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].YOUR_ORGANIZATION_NAME" "YOUR_ORGANIZATION_NAME" "${PARMSFILE}";
+  echo "export YOUR_ORGANIZATION_NAME=${YOUR_ORGANIZATION_NAME}";
+
+  export HOST_SERVER_NAME="${VIRTUAL_HOST_DOMAIN_NAME}";
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].protocol.HOST_SERVER_PROTOCOL" "HOST_SERVER_PROTOCOL" "${PARMSFILE}";
+  echo "export HOST_SERVER_PROTOCOL='${HOST_SERVER_PROTOCOL}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].protocol.HOST_SERVER_PORT" "HOST_SERVER_PORT" "${PARMSFILE}";
+  echo "export HOST_SERVER_PORT='${HOST_SERVER_PORT}';" | tee -a ${ENVIRONMENT};
+
+};
+
+
+function collectBuildSecrets() {
+
+  getParmFromJSON ".KEYSTORE_PWD" "KEYSTORE_PWD" "${VHOST_SECRETS_FILE}";
+  echo "export KEYSTORE_PWD=${KEYSTORE_PWD}";
+
+};
 
 
 function startSSHAgent() {
@@ -115,26 +243,27 @@ function startSSHAgent() {
   fi;
 };
 
-# function UpdateEnvVars() {
-#   local ENV_FILE=$1;
-#   local ENV_NAME=$2;
-#   local ENV_VAL=$3;
-#   local ENV_FILE_NAME=$(basename ${ENV_FILE});
+function UpdateEnvVars() {
 
-#   [ -f "${ENV_FILE}" ] || touch ${ENV_FILE};
-#   echo -e "Correcting ${ENV_NAME} in '${ENV_FILE}' variables.";
+  local ENV_FILE=$1;
+  local ENV_NAME=$2;
+  local ENV_VAL=$3;
+  local ENV_FILE_NAME=$(basename ${ENV_FILE});
 
-#   if [[ $(grep -c "export ${ENV_NAME}=${ANDROID_HOME}"  ${ENV_FILE}) -lt 1 ]]; then
-#     while [[ $(grep -c ${ENV_NAME} ${ENV_FILE}) -gt 0 ]]; do
-#       sed -i "/${ENV_NAME}/d" ${ENV_FILE};
-#     done;
-#     echo -e "\nexport ${ENV_NAME}=${ENV_VAL};\n" | tee -a ${ENV_FILE};
-#   fi;
+  [ -f "${ENV_FILE}" ] || touch ${ENV_FILE};
+  echo -e "Correcting ${ENV_NAME} in '${ENV_FILE}' variables.";
 
-#   cat ${ENV_FILE} | uniq > /dev/shm/${ENV_FILE_NAME};
-#   mv /dev/shm/${ENV_FILE_NAME} ${ENV_FILE};
+  if [[ $(grep -c "export ${ENV_NAME}=${ANDROID_HOME}"  ${ENV_FILE}) -lt 1 ]]; then
+    while [[ $(grep -c ${ENV_NAME} ${ENV_FILE}) -gt 0 ]]; do
+      sed -i "/${ENV_NAME}/d" ${ENV_FILE};
+    done;
+    echo -e "\nexport ${ENV_NAME}=${ENV_VAL};\n" | tee -a ${ENV_FILE};
+  fi;
 
-# }
+  cat ${ENV_FILE} | uniq > /dev/shm/${ENV_FILE_NAME};
+  mv /dev/shm/${ENV_FILE_NAME} ${ENV_FILE};
+
+}
 
 # [ -z $(jq --version &>/dev/null ) ] && sudo apt -y install jq # || echo "found jq version «$(jq --version)»";
 # function GetProjectName() {

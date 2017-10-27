@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 #
 
-LCTN=$0; if [[ "${LCTN}" = "-bash" ]]; then LCTN="."; fi;
-pushd `dirname ${LCTN}` > /dev/null; SCRIPTPATH=`pwd`; popd > /dev/null;
-PROJECT_ROOT=${SCRIPTPATH%/android};
-PROJECT_ROOT=${PROJECT_ROOT%/.scripts};
+# LCTN=$0; if [[ "${LCTN}" = "-bash" ]]; then LCTN="."; fi;
+# pushd `dirname ${LCTN}` > /dev/null; SCRIPTPATH=`pwd`; popd > /dev/null;
+# PROJECT_ROOT=${SCRIPTPATH%/android};
+# PROJECT_ROOT=${PROJECT_ROOT%/.scripts};
+declare SCRIPT=$(readlink -f "$0");
+declare SCRIPTPATH=$(dirname "$SCRIPT");  # Where this script resides
+declare SCRIPTNAME=$(basename "$SCRIPT"); # This script's name
+declare PROJECTPATH=$(readlink -f "${SCRIPTPATH}/../..");
+
+function CURTAIL() {  return 0; }
 
 echo "Initialized 'installAndBuildTools'";
 function listVariables() {
@@ -30,7 +36,6 @@ function listVariables() {
   SDK_PLATFORM_ANDROID_711_API_25=${SDK_PLATFORM_ANDROID_711_API_25};
   ZIPALIGN_PATH=${ZIPALIGN_PATH};
   ZIPALIGN_BOUNDARY=${ZIPALIGN_BOUNDARY};
-  BUILD_DIRECTORY=${BUILD_DIRECTORY};
   KEYSTORE_PWD=${KEYSTORE_PWD};
   HOST_SERVER_PROTOCOL=${HOST_SERVER_PROTOCOL};
   HOST_SERVER_NAME=${HOST_SERVER_NAME};
@@ -43,11 +48,10 @@ function listVariables() {
 
 }
 
-set -e;
-# source ${PROJECT_ROOT}/.scripts/trap.sh;
-source ${PROJECT_ROOT}/.scripts/utils.sh;
 
-GetProjectName ${PROJECT_ROOT}/package.json;
+source ${PROJECTPATH}/.scripts/utils.sh;
+
+# GetProjectName ${PROJECT_ROOT}/package.json;
 
 export ANDROID_PLACE="${HOME}/.android";
 export ANDROID_SDK="android-sdk-linux";
@@ -57,12 +61,11 @@ export SDK_MANAGER="${ANDROID_TOOLS_BIN}/sdkmanager";
 export ANDROID_LICENSES="${ANDROID_HOME}/licenses";
 export SDK_LICENSE="${ANDROID_LICENSES}/android-sdk-license";
 
-
 export ENV_FILE="${HOME}/.profile";
 
 UpdateEnvVars ${ENV_FILE} ANDROID_HOME ${ANDROID_HOME};
 
-export TMP_PLUGIN_LIST="/tmp/plugins.txt";
+export TMP_PLUGIN_LIST="/dev/shm/plugins.txt";
 export PLUGIN_NAME="";
 export PLUGIN_NUM="";
 
@@ -80,7 +83,6 @@ export ZIPALIGN_PATH=${ANDROID_HOME}/build-tools/${BUILD_TOOLS_VERSION};
 
 export ZIPALIGN_BOUNDARY=4;
 
-declare BUILD_DIRECTORY=${BUILD_DIRECTORY:-${PROJECT_ROOT}};
 declare KEYSTORE_PWD=${KEYSTORE_PWD:-null};
 declare HOST_SERVER_PROTOCOL=${HOST_SERVER_PROTOCOL:-null};
 declare HOST_SERVER_NAME=${HOST_SERVER_NAME:-null};
@@ -90,9 +92,10 @@ declare YOUR_ORGANIZATION_NAME=${YOUR_ORGANIZATION_NAME:-null};
 
 export TMP_DIRECTORY=${TMP_DIRECTORY:-/dev/shm/android_build};
 
-export METEOR_VERSION=$(cat ${PROJECT_ROOT}/.meteor/release);
+export METEOR_VERSION=$(cat ${PROJECTPATH}/.meteor/release);
 METEOR_VERSION=${METEOR_VERSION#METEOR@};
 
+set -e;
 
 function getPluginNumber() {
 
@@ -327,7 +330,6 @@ function PrepareToBuildAndroidAPK() {
   echo "   ~                              Temporary build directory : " ${TMP_DIRECTORY}
   echo "### ~   ~   ~    ";
 
-
   set +e;
   set -e;
 
@@ -374,6 +376,8 @@ function PrepareToBuildAndroidAPK() {
     echo "Have a key pair for '${APP_NAME}'.";
   fi;
 
+  echo "Ready to build Android apks.";
+
 }
 
 function BuildAndroidAPK() {
@@ -383,12 +387,12 @@ function BuildAndroidAPK() {
   mkdir -p ${TARGET_DIRECTORY};
 
   declare APK_PUBLISH_DIR="public/mobile/android";
-  mkdir -p ${BUILD_DIRECTORY}/${APK_PUBLISH_DIR};
+  mkdir -p ${PROJECTPATH}/${APK_PUBLISH_DIR};
 
-  pushd ${BUILD_DIRECTORY} >/dev/null;
+  pushd ${PROJECTPATH} >/dev/null;
 
     export APP_RELEASE=$(jq -r .version package.json);
-#    export APP_NAME=$(jq -r .name package.json);
+    export APP_NAME=$(jq -r .name package.json);
 
     echo -e "\nRemoving any '${APP_NAME}.apk' left in publish directory : './${APK_PUBLISH_DIR}'";
     rm -f ./${APK_PUBLISH_DIR}/${APP_NAME}.apk;
@@ -399,7 +403,7 @@ function BuildAndroidAPK() {
     echo -e "\nBuilding project '${APP_NAME}' : meteor build ${TARGET_DIRECTORY} --mobile-settings=settings.json --server=${HOST_SERVER_URI};\n\n";
     meteor build ${TARGET_DIRECTORY} --mobile-settings=settings.json --server=${HOST_SERVER_URI};
 
-    echo "Built project : ${BUILD_DIRECTORY} in ${TARGET_DIRECTORY} for server ${HOST_SERVER_URI}";
+    echo "Built project : ${PROJECTPATH} in ${TARGET_DIRECTORY} for server ${HOST_SERVER_URI}";
     echo -e "mv ${TARGET_DIRECTORY}/android/release-unsigned.apk ${TARGET_DIRECTORY}/android/${APP_NAME}_unaligned.apk";
     mv ${TARGET_DIRECTORY}/android/release-unsigned.apk ${TARGET_DIRECTORY}/android/${APP_NAME}_unaligned.apk;
 
@@ -416,15 +420,15 @@ function BuildAndroidAPK() {
     ${ZIPALIGN_PATH}/zipalign -f ${ZIPALIGN_BOUNDARY} ${APP_NAME}_unaligned.apk ${APP_NAME}.apk;
     echo -e "Aligned the APK file.";
 
-    mv ${APP_NAME}.apk ${BUILD_DIRECTORY}/${APK_PUBLISH_DIR};
+    mv ${APP_NAME}.apk ${PROJECTPATH}/${APK_PUBLISH_DIR};
 
-    declare APK_NOTE_FILE="${BUILD_DIRECTORY}/${APK_PUBLISH_DIR}/${APP_NAME}.apk.txt";
+    declare APK_NOTE_FILE="${PROJECTPATH}/${APK_PUBLISH_DIR}/${APP_NAME}.apk.txt";
     echo -e "APK Note : "                                                > ${APK_NOTE_FILE};
     echo -e " - App '${APP_NAME}' release number : ${APP_RELEASE} "     >> ${APK_NOTE_FILE};
     echo -e " - Target server is : ${HOST_SERVER_URI} "                 >> ${APK_NOTE_FILE};
     echo -e " - SDK Platform Android 6.0, API 25, revision 3 : "        >> ${APK_NOTE_FILE};
 
-    echo -e "Placed signed and aligned APK file into project's public directory, '${BUILD_DIRECTORY}/${APK_PUBLISH_DIR}'.";
+    echo -e "Placed signed and aligned APK file into project's public directory, '${PROJECTPATH}/${APK_PUBLISH_DIR}'.";
 
   popd  >/dev/null;
   #
