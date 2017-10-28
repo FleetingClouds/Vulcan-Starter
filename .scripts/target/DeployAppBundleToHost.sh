@@ -20,7 +20,7 @@ function CURTAIL() {  return 0; }
 # source ${ENV_VARS};
 # source ${STANDARD_ENV_VARS};
 
-# declare TARGET_SCRIPTS="/utils/target";
+declare TARGET_SCRIPTS="/.scripts/target/host_scripts";
 
 declare RAM_DISK=/dev/shm;
 declare BUILD_TARGET_DIR=${RAM_DISK}/target;
@@ -35,7 +35,6 @@ export APP_NAME="";
 export APP_RELEASE="";
 
 mkdir -p ${HOST_SCRIPTS};
-echo "" > ${provisioningParmsFile};
 
 function DeployBundle() {
 
@@ -123,17 +122,13 @@ set +e;
     pushd ${BUILD_TARGET_DIR} >/dev/null;
 
       tar zcvf ${COMPLETED_BUNDLE} bundle >/dev/null;
+      echo -e "scp ${COMPLETED_BUNDLE} ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/MeteorApp";
       scp ${COMPLETED_BUNDLE} ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/MeteorApp;
       echo -e "${PRTY} Secure CoPyed '${APP_NAME}' server bundle as '${COMPLETED_BUNDLE}'.";
 
     popd >/dev/null;
 
   popd &>/dev/null;
-
-}
-
-function notReady() {
-
 
   declare APP_INSTALLER="InstallMeteorApp";
 
@@ -142,6 +137,22 @@ function notReady() {
     echo -e "${PRTY} Secure CoPying '${APP_INSTALLER}.sh' to server.";
     sh ${APP_INSTALLER}.template.sh > ${APP_INSTALLER}.sh;
     chmod a+x ${APP_INSTALLER}.sh;
+
+echo -e "# #-----------------------------------------------------------";
+# ls -l;
+# ls -la ${NVM_DIR};
+pwd;
+hostname;
+
+CURTAIL && (
+  echo -e "DeployAppBundleToHost Line # 147
+
+               * * *  CURTAILED * * * ";
+) && exit || (
+  echo -e "             * * *  NOT curtailed - Start * * * ";
+)
+echo -e "# #-----------------------------------------------------------";
+
     scp ${APP_INSTALLER}.sh ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/${BUNDLE_DIRECTORY_NAME};
     rm -fr ${APP_INSTALLER}.sh;
 

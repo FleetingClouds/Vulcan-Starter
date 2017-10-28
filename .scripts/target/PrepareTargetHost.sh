@@ -72,9 +72,8 @@ echo -e "
 
 
 
-
-||||||||||||||||||||||||||||||||||||||||||||||";
-# ssh ${DEPLOY_USER}@${TARGET_SRVR} ". ~/.bash_login && ~/DeploymentPkgInstallerScripts/DeploymentPackageRunner.sh";
+||||||||||||||||||||||||||||||||||||||||| |||";
+ssh ${DEPLOY_USER}@${TARGET_SRVR} ". ~/.bash_login && ~/DeploymentPkgInstallerScripts/DeploymentPackageRunner.sh";
 
 echo -e "      ** Done **
 
@@ -132,7 +131,8 @@ function PrepareServer () {
   echo -e "ENVIRONMENT => ${ENVIRONMENT}";
   echo -e "#!/usr/bin/env bash" > ${ENVIRONMENT};
 
-  collectProvisioningParameters ${provisioningParmsFile};
+  collectProvisioningParameters;
+#  collectProvisioningParameters ${provisioningParmsFile};
 
 
   cp ${PARMSFILE} ${provisioningParmsFile};
@@ -158,5 +158,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   PrepareServer;
 fi;
 
-# echo -e "||||||||||||| C U R T A I L E D |||||||||||||||||||||";
+# echo -e "||||||||||||| C U R T A I L E D |||||||||||||||||||";
 exit;

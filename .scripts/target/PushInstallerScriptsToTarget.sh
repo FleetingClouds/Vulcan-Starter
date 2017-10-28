@@ -300,7 +300,8 @@ pushd ${BUNDLING_DIRECTORY} >/dev/null;
     cp -p ${ENVIRONMENT} .;
     if [[  -f ${LETS_ENCYPT}  ]]; then
       echo -e "${PRTY} Pushing 'letsencrypt' bundle.";
-      cp ${LETS_ENCYPT} .;
+      mkdir -p ./secrets;
+      cp ${LETS_ENCYPT} ./secrets;
     else
       echo -e "${PRTY} Found NO 'letsencrypt' bundle for '${VIRTUAL_HOST_DOMAIN_NAME}'.";
     fi;

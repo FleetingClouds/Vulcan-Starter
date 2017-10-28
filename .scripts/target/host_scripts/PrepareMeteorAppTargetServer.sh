@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #
+
+function CURTAIL() {  return 0; }
+
 function initialSecurityTasks() {
 #
   declare SKIP="/dev/shm/didFirewall.lock";
@@ -306,8 +309,24 @@ sudo -A rm -fr ${DEPLOY_DIR}/${BUNDLE_DIRECTORY_NAME};
 sudo -A mv ${BUNDLE_DIRECTORY_NAME} ${DEPLOY_DIR};
 sudo -A chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${DEPLOY_DIR}/${BUNDLE_DIRECTORY_NAME};
 sudo -A chmod go-rwx ${DEPLOY_DIR}/${BUNDLE_DIRECTORY_NAME};
-
+sudo -A mkdir -p ${DEPLOY_DIR}/${APP_DIRECTORY_NAME};
 
 echo -e "${PRTY} Complete
                    Quitting target RPC... :: $(date)";
 exit;
+
+
+# #------------------------------------------------------------
+pwd;
+ls -l ${DEPLOY_DIR};
+CURTAIL && (
+  echo -e "PrepareMeteorAppTargetServer.sh Line # 316
+
+  APP_DIRECTORY_NAME = ${APP_DIRECTORY_NAME};
+
+              * * *  CURTAILED * * * ";
+) && exit || (
+  echo -e "             * * *  NOT curtailed - Start * * * ";
+)
+# #------------------------------------------------------------
+

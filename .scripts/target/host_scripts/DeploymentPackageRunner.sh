@@ -4,6 +4,8 @@ declare SCRIPT=$(readlink -f "$0");
 declare SCRIPTPATH=$(dirname "$SCRIPT");
 declare SCRIPTNAME=$(basename "${SCRIPT}");
 
+function CURTAIL() {  return 0; }
+
 PRTY="\n  ==> Runner ::";
 LOG="/tmp/${SCRIPTNAME}.log";
 touch ${LOG};
@@ -36,6 +38,7 @@ NGINX_VIRTUAL_HOST_FILE_PATH=${NGINX_VHOSTS_DEFINITIONS}/${VIRTUAL_HOST_DOMAIN_N
 function prepareNginxVHostDirectories() {
 
   echo -e "${PRTY} Creating Nginx virtual host directory structure." | tee -a ${LOG};
+
   sudo -A mkdir -p ${NGINX_VHOSTS_DEFINITIONS};
   sudo -A mkdir -p ${NGINX_VHOSTS_PUBLICATIONS};
   # sudo -A mkdir -p ${NGINX_VHOSTS_CERTIFICATES};
@@ -123,28 +126,6 @@ function obtainLetsEncryptSSLCertificate() {
     sudo -A certbot certonly;
   fi;
 
-      # declare CP=$(echo "${VIRTUAL_HOST_DOMAIN_NAME}_CERT_PATH" | tr '[:lower:]' '[:upper:]' | tr '.' '_' ;)
-      # declare CERT_PATH=$(echo ${!CP});
-      # # sudo -A mkdir -p ${CERT_PATH};
-      # # sudo -A chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${CERT_PATH};
-      # # ls -l "${CERT_PATH}";
-
-      # echo -e "${PRTY} Moving '${VIRTUAL_HOST_DOMAIN_NAME}' site certificate from '${CERT_PATH}'
-      #                                     to ${NGINX_VHOSTS_CERTIFICATES}/${VIRTUAL_HOST_DOMAIN_NAME}." | tee -a ${LOG};
-      # sudo -A mkdir -p             ${LETSENCRYPT_LIVE}/${VIRTUAL_HOST_DOMAIN_NAME};
-      # sudo -A mkdir -p             ${LETSENCRYPT_ARCH}/${VIRTUAL_HOST_DOMAIN_NAME};
-
-      # sudo -A cp ${CERT_PATH}/*.pem    ${LETSENCRYPT_ARCH}/${VIRTUAL_HOST_DOMAIN_NAME};
-      # sudo -A chown -R ${DEPLOY_USER}:${DEPLOY_USER}     ${LETSENCRYPT_ARCH}/${VIRTUAL_HOST_DOMAIN_NAME};
-      # sudo -A chmod -R go-rwx,u+rw ${LETSENCRYPT_ARCH}/${VIRTUAL_HOST_DOMAIN_NAME};
-
-      # pushd ${LETSENCRYPT_LIVE}/${VIRTUAL_HOST_DOMAIN_NAME} >/dev/null;
-      #   sudo -A rm -fr *.pem;
-      #   sudo -A ln -s ../../archive/${VIRTUAL_HOST_DOMAIN_NAME}/fullchain.pem fullchain.pem;
-      #   sudo -A ln -s ../../archive/${VIRTUAL_HOST_DOMAIN_NAME}/privkey.pem privkey.pem;
-      # popd >/dev/null;
-      # # ls -l                        ${LETSENCRYPT_LIVE}/${VIRTUAL_HOST_DOMAIN_NAME};
-
 }
 
 
@@ -161,6 +142,7 @@ echo "TARGET_SECRETS_FILE=${TARGET_SECRETS_FILE}";
 
 if [[ "X${VIRTUAL_HOST_DOMAIN_NAME}X" = "XX" ]]; then usage "VIRTUAL_HOST_DOMAIN_NAME=${VIRTUAL_HOST_DOMAIN_NAME}"; fi;
 
+
 echo -e "${PRTY} Testing secrets file availability... [   ls \"${TARGET_SECRETS_FILE}\"  ]";
 if [ ! -f "${TARGET_SECRETS_FILE}" ]; then errorNoSecretsFileSpecified "${TARGET_SECRETS_FILE}"; fi;
 source ${TARGET_SECRETS_FILE};
@@ -174,9 +156,7 @@ pushd DeploymentPkgInstallerScripts >/dev/null;
 
   source environment.sh;
 
-  echo -e "
-
-                      ${RDBMS_DIALECT}
+  echo -e " Backend service is : ${RDBMS_DIALECT}
 
   ";
 
@@ -186,12 +166,12 @@ pushd DeploymentPkgInstallerScripts >/dev/null;
 
   prepareNginxVHostDirectories;
 
-  if [[ -f letsencrypt.tar.gz ]]; then
+  if [[ -f ./secrets/letsencrypt.tar.gz ]]; then
     echo -e "${PRTY}
             # # # Skipping formal SSL certificate installation for now # # #
 Extracting $(pwd)/letsencrypt.tar.gz to /etc .....
     ";
-    sudo -A tar zxvf letsencrypt.tar.gz -C /etc;
+    sudo -A tar zxvf ./secrets/letsencrypt.tar.gz -C /etc;
 #    sudo -A cp ./secrets/dh/*.pem /etc/ssl/private;
   else
     echo -e " # # # Obtaining SSL certificates for '${VIRTUAL_HOST_DOMAIN_NAME}' # # #  ";
@@ -221,43 +201,8 @@ Extracting $(pwd)/letsencrypt.tar.gz to /etc .....
   echo -e "${PRTY} Restarting the Nginx systemd service . . ." | tee -a ${LOG};
   sudo -A systemctl start nginx.service >> ${LOG} 2>&1;
 
-# echo "Logging '${SCRIPTNAME}' execution to '${LOG}'." | tee ${LOG};
-# echo -e "${PRTY} Stopping the '${SERVICE_UID}' systemd service, in case it's running . . ." | tee -a ${LOG};
-# sudo -A systemctl stop ${UNIT_FILE} >> ${LOG} 2>&1;
-
-# echo -e "${PRTY} Disabling the '${SERVICE_UID}' systemd service, in case it's enabled . . ." | tee -a ${LOG};
-# sudo -A systemctl disable ${UNIT_FILE} >> ${LOG} 2>&1;
-
-# echo -e "${PRTY} Deleting the '${SERVICE_UID}' systemd unit file, in case there's one already . . ." | tee -a ${LOG};
-# sudo -A rm /etc/systemd/system/${UNIT_FILE} >> ${LOG} 2>&1;
-
-# echo -e "${PRTY} Deleting director toml file '${DIRECTOR_TOML_FILE_PATH}', in case there's one already . . ." | tee -a ${LOG};
-# sudo -A rm -fr ${DIRECTOR_TOML_FILE_PATH} >> ${LOG};
-
-# echo -e "${PRTY} Ensuring Habitat Supervisor is available (installing if necessary...)" | tee -a ${LOG};
-# sudo -A ${DEPLOY_USER} install core/${DEPLOY_USER}-sup >> ${LOG} 2>&1;
-# sudo -A hab pkg binlink core/hab-sup hab-sup;
-# pushd /bin >/dev/null;
-#   sudo -A ln -s /usr/local/bin/hab hab;
-# popd;
-
-# echo -e "${PRTY} Ensuring Habitat Director is available (installing if necessary...)" | tee -a ${LOG};
-# sudo -A hab install core/hab-director; # > /dev/null 2>&1;
-# sudo -A hab pkg binlink core/hab-director hab-director;
-
-
   echo -e "${PRTY} Restarting the MongoDB systemd service . . ." | tee -a ${LOG};
   sudo -A systemctl start mongodb.service >> ${LOG} 2>&1;
-
-  # MONGO_ORIGIN="billmeyer";
-  # # MONGO_ORIGIN="core";
-  # MONGO_PKG="mongodb";
-  # MONGO_INSTALLER="${MONGO_ORIGIN}/${MONGO_PKG}";
-  # echo -e "${PRTY}  --> sudo -A hab pkg install '${MONGO_INSTALLER}'" | tee -a ${LOG};
-  # sudo -A hab pkg install ${MONGO_INSTALLER};
-
-  # echo -e "${PRTY} Starting '${MONGO_INSTALLER}' momentarily to set permissions." | tee -a ${LOG};
-  # sudo -A hab start ${MONGO_INSTALLER} &
 
   sleep 3;
 
@@ -275,66 +220,6 @@ mongo -u "${MONGO_ADMIN}" -p "${NOSQLDB_ADMIN_PWD}" --authenticationDatabase "${
 EOFM
 
 
-  # echo -e "${PRTY} Ensuring package '${PACKAGE_PATH}' is available" | tee -a ${LOG};
-
-  # echo -e "${PRTY}  --> sudo -A hab pkg install '${PACKAGE_PATH}'" | tee -a ${LOG};
-  # sudo -A hab pkg install ${PACKAGE_PATH};
-
-  # PACKAGE_ABSOLUTE_PATH=$(sudo -A hab pkg path ${PACKAGE_PATH});
-
-  # PACKAGE_UUID=${PACKAGE_ABSOLUTE_PATH#$DNLD_DIR/};
-  # YOUR_PKG_VERSION=$(echo ${PACKAGE_UUID} | cut -d / -f 1);
-  # YOUR_PKG_TIMESTAMP=$(echo ${PACKAGE_UUID} | cut -d / -f 2);
-
-  # echo -e "${PRTY} Package universal unique ID is :: '${SERVICE_PATH}/${YOUR_PKG_VERSION}/${YOUR_PKG_TIMESTAMP}'" >>  ${LOG};
-  # if [[ "X${YOUR_PKG_VERSION}X" = "XX" ]]; then
-  #   echo "Invalid package version '${YOUR_PKG_VERSION}'."  | tee -a ${LOG};
-  #   exit 1;
-  # fi;
-  # if [[ "${#YOUR_PKG_TIMESTAMP}" != "14" ]]; then
-  #   echo "Invalid package timestamp '${YOUR_PKG_TIMESTAMP}'."  | tee -a ${LOG};
-  #   exit 1;
-  # fi;
-
-
-  # # ps aux | grep mongo;
-  # sudo -A pkill hab-sup;
-  # wait;
-
-
-
-  ### ${YOUR_ORG}/${YOUR_PKG}/${YOUR_PKG_VERSION}/${YOUR_PKG_TIMESTAMP}/
-
-
-  # sudo -A mkdir -p ${META_DIR};
-  # sudo -A mkdir -p ${WORK_DIR};
-
-  # echo -e "${PRTY} Creating director toml file '${DIRECTOR_TOML_FILE_PATH}' from template" | tee -a ${LOG};
-  # ${SCRIPTPATH}/director.toml.template.sh > ${SCRIPTPATH}/${DIRECTOR_TOML_FILE};
-  # echo -e "${PRTY} Copying director toml file to '${META_DIR}' directory" | tee -a ${LOG};
-  # sudo -A cp ${SCRIPTPATH}/${DIRECTOR_TOML_FILE} ${META_DIR} >> ${LOG};
-
-  # echo -e "${PRTY} Creating systemd unit file to 'systemd' directory" | tee -a ${LOG};
-  # ${SCRIPTPATH}/systemd.service.template.sh | sudo -A tee ${SCRIPTPATH}/${UNIT_FILE};
-  # echo -e "${PRTY} Copying unit file to 'systemd' directory" | tee -a ${LOG};
-  # sudo -A cp ${SCRIPTPATH}/${UNIT_FILE} /etc/systemd/system >> ${LOG};
-
-  # echo -e "${PRTY} Creating systemd unit file to 'systemd' directory" | tee -a ${LOG};
-  # ${SCRIPTPATH}/supervisor.service.template.sh | sudo -A tee ${SCRIPTPATH}/${UNIT_FILE};
-  # echo -e "${PRTY} Copying unit file to 'systemd' directory" | tee -a ${LOG};
-  # sudo -A cp ${SCRIPTPATH}/${UNIT_FILE} /etc/systemd/system >> ${LOG};
-
-  # echo -e "${PRTY} Creating user toml file '${USER_TOML_FILE_PATH}' from template" | tee -a ${LOG};
-  # ${SCRIPTPATH}/app.user.toml.template.sh > ${SCRIPTPATH}/${USER_TOML_FILE};
-  # echo -e "${PRTY} Copying user toml file to '${WORK_DIR}' directory" | tee -a ${LOG};
-  # sudo -A cp ${SCRIPTPATH}/${USER_TOML_FILE} ${WORK_DIR} >> ${LOG};
-
-  # ##########################
-  # export SECRETS_DIR="$(cat vhost_env_vars.sh \
-  #    | grep .ssh \
-  #    | grep ${VIRTUAL_HOST_DOMAIN_NAME} \
-  #    | cut -d "=" -f 2 \
-  #    | sed 's/^"\(.*\)"$/\1/')";
 
   source environment.sh;
   # declare VHDN=$(  echo ${VIRTUAL_HOST_DOMAIN_NAME} \
@@ -362,105 +247,6 @@ EOFM
   sudo -A cp -r ${TARGET_SECRETS_PATH}/* ${SECRETS} >> ${LOG};
   sudo -A chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${SECRETS} >> ${LOG};
 
-
-  # echo -e "${PRTY} Copying Diffie-Hellman file to SSL directory" | tee -a ${LOG};
-  # echo -e " - From : ${SECRETS}/dh/*" | tee -a ${LOG};
-  # echo -e " - To   : ${DIFFIE_HELLMAN_DIR}" | tee -a ${LOG};
-
-  # sudo -A mkdir -p ${DIFFIE_HELLMAN_DIR} >> ${LOG};
-  # sudo -A touch ${DIFFIE_HELLMAN_DIR}/DiffieHellman_files_go_here >> ${LOG};
-  # sudo -A chmod    ug+w         ${DIFFIE_HELLMAN_DIR}/* >> ${LOG};
-  # sudo -A cp ${SECRETS}/dh/*    ${DIFFIE_HELLMAN_DIR} >> ${LOG};
-  # sudo -A chown -R root:hab     ${DIFFIE_HELLMAN_DIR} >> ${LOG};
-  # sudo -A chmod -R ug+rwx,o-rwx ${DIFFIE_HELLMAN_DIR} >> ${LOG};
-  # sudo -A ls -l ${DIFFIE_HELLMAN_DIR}/*;
-  # sudo -A chmod    ug-w         ${DIFFIE_HELLMAN_DIR}/* >> ${LOG};
-
-  # echo -e "${PRTY} Copying Meteor settings file to '${WORK_DIR}/var' directory" | tee -a ${LOG};
-  # sudo -A mkdir -p ${WORK_DIR}/var >> ${LOG};
-  # sudo -A cp ${TARGET_SETTINGS_FILE} ${WORK_DIR}/var >> ${LOG};
-  # sudo -A chown -R hab:hab ${WORK_DIR}/var >> ${LOG};
-
-  # echo -e "${PRTY} Enabling the '${SERVICE_UID}' systemd service . . ." | tee -a ${LOG};
-  # sudo -A systemctl enable ${UNIT_FILE};
-
-  # echo -e "${PRTY} Ensuring there is a directory available for '${SERVICE_UID}' logs" | tee -a ${LOG};
-  # sudo -A mkdir -p ${META_DIR}/var/logs; # > /dev/null;
-
-  # .. #  SET UP STUFF THAT HAB PACKAGE OUGHT TO DO FOR ITSELF
-  # .. #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # .. # sudo -A mkdir -p ${META_DIR}/data; # > /dev/null;
-  # .. # sudo -A touch ${META_DIR}/data/index.html;
-  # .. # sudo -A find ${META_DIR} -type d -print0 | sudo -A xargs -0 chmod 770; # > /dev/null;
-  # .. # sudo -A find ${META_DIR} -type f -print0 | sudo -A xargs -0 chmod 660; # > /dev/null;
-  # .. # whoami;
-  # .. # sudo -A chown -R hab:hab ${META_DIR};
-  # .. # sudo -A ls -l ${META_DIR};
-  # .. # sudo -A ls -l ${META_DIR}/data;
-  # .. # sudo -A ls -l ${META_DIR}/data/index.html;
-  # .. # sudo -A echo -e "nginx is ready" >> ${META_DIR}/data/index.html;
-
-  # .. # declare NGINX_CONF="${SVC_DIR}/nginx/config/nginx.conf";
-  # declare NGINX_CONFIG_DIR="/hab/pkgs/${YOUR_ORG}/nginx/1.10.1/20161105150115/config";
-  # declare NGINX_CONF="${NGINX_CONFIG_DIR}/nginx.conf";
-  # echo -e "${PRTY} Ensuring that Nginx bucket size can be set to 64 in '${NGINX_CONF}'." | tee -a ${LOG};
-
-  # declare EXISTING_SETTING="keepalive_timeout";
-  # declare MISSING_SETTING="server_names_hash_bucket_size";
-  # declare REPLACEMENT="    ${MISSING_SETTING} 64;\n    ${EXISTING_SETTING} 60;";
-
-  # echo -e "${PRTY} Prepare incrond trigger for workaround ." | tee -a ${LOG};
-
-  # declare INCRON_D="/etc/incron.d";
-  # declare INCRON_TRIGGER="${INCRON_D}/fixNginxVar";
-  # declare NGINX_DIR="/etc/nginx";
-  # declare NGINX_VAR_DIR="${NGINX_DIR}/var";
-  # declare DEPLOY_USER_SCRIPTS_DIR="/home/${DEPLOY_USER}/scripts";
-  # declare NGINX_OWNERSHIP_FIXER="${DEPLOY_USER_SCRIPTS_DIR}/postStartExec.sh";
-  # #
-  # sudo -A mkdir -m 755 -p ${INCRON_D};
-  # sudo -A chown root:root ${INCRON_D};
-  # #
-  # sudo -A mkdir -m 775 -p ${NGINX_VAR_DIR};
-  # sudo -A chown ${DEPLOY_USER}:${DEPLOY_USER} ${NGINX_VAR_DIR};
-
-  # sudo -A mkdir -m 770 -p ${DEPLOY_USER_SCRIPTS_DIR};
-  # sudo -A chown ${DEPLOY_USER}:${DEPLOY_USER} ${DEPLOY_USER_SCRIPTS_DIR};
-
-
-  # sudo tee ${NGINX_OWNERSHIP_FIXER} <<EOHOOK >/dev/null
-  # #!/usr/bin/env bash
-  # logger  "¬¬¬¬¬¬¬¬   ${INCRON_TRIGGER} ¬¬¬¬¬¬¬¬¬¬";
-  # if [[ "\$(stat -c '%U'  ${NGINX_VAR_DIR}/)" = "${DEPLOY_USER}" ]]; then exit 0; fi;
-  # logger  "++++    chown ${DEPLOY_USER}:${DEPLOY_USER} ${NGINX_VAR_DIR} ++++++";
-  # sleep 5;
-  # chmod 775 ${NGINX_VAR_DIR};
-  # chown ${DEPLOY_USER}:${DEPLOY_USER} ${NGINX_VAR_DIR};
-  # EOHOOK
-  # sudo chown root:${DEPLOY_USER} ${NGINX_OWNERSHIP_FIXER};
-  # sudo chmod 770      ${NGINX_OWNERSHIP_FIXER};
-
-  # sudo tee ${INCRON_TRIGGER} <<EOID >/dev/null
-  # ${NGINX_VAR_DIR}/ IN_ATTRIB ${NGINX_OWNERSHIP_FIXER}
-  # EOID
-  # sudo chown root:incron ${INCRON_TRIGGER};
-  # sudo chmod 600 ${INCRON_TRIGGER};
-
-  # # sudo -A mkdir -p ${NGINX_CONFIG_DIR};
-  # # sudo -A touch ${NGINX_CONF};
-  # if ! sudo -A grep "${MISSING_SETTING}" ${NGINX_CONF} >/dev/null; then
-  #   echo -e "
-  #   FIXME : This hack should not be necessary when Habitat accepts my PR.
-  #   ";
-  #   sudo -A sed -i "s|.*${EXISTING_SETTING}.*|${REPLACEMENT}|" ${NGINX_CONF};
-  # fi;
-  # sudo -A ls -l ${NGINX_CONFIG_DIR};
-
-
-  # echo -e "${PRTY} Start up the '${SERVICE_UID}' systemd service . . ." | tee -a ${LOG};
-  # echo -e "                 sudo journalctl -n 200 -fb -u ${UNIT_FILE}  " | tee -a ${LOG};
-
-  # sudo -A systemctl start ${UNIT_FILE};
 
   echo -e "${PRTY} Clean up APT dependencies . . ." | tee -a ${LOG};
   sudo apt-get -y update;
@@ -567,7 +353,6 @@ EOFM
     echo -e "${PRTY} No backup to restore ...";
   fi;
 
-
   declare NGINX_VHOST_PUBLIC_DIR="public";
 
   # declare NGINX_VHOST_CONFIG="${NGINX_VHOSTS_DEFINITIONS}/${VIRTUAL_HOST_DOMAIN_NAME}";
@@ -587,9 +372,9 @@ EOFM
 
   echo -e "${PRTY}  - NGINX_VHOST_ROOT_DIR -- ${NGINX_VHOST_ROOT_DIR}";
   declare NGINX_STATIC_FILES_DIR=${NGINX_VHOST_ROOT_DIR}/public;
-
-  declare DEFAULT_METEOR_BUNDLE="${HOME}/MeteorApp/0.0.0";
+  declare DEFAULT_METEOR_BUNDLE="${HOME}/${APP_DIRECTORY_NAME}/0.0.0";
   mkdir -p ${DEFAULT_METEOR_BUNDLE};
+  chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${HOME}/${APP_DIRECTORY_NAME};
   cp -f node_hello_world.js ${DEFAULT_METEOR_BUNDLE}/main.js;
 
   declare DEFAULT_METEOR_PUBLIC_DIRECTORY="${DEFAULT_METEOR_BUNDLE}/programs/web.browser/app";
@@ -632,6 +417,7 @@ EOFM
 
 popd >/dev/null;
 
+
 echo -e "${PRTY} Installing Node Version Manager..." | tee -a ${LOG};
 export NVM_LATEST=$(curl -s https://api.github.com/repos/creationix/nvm/releases/latest |   jq --raw-output '.tag_name';);  echo ${NVM_LATEST};
 wget -qO- https://raw.githubusercontent.com/creationix/nvm/${NVM_LATEST}/install.sh | bash;
@@ -641,6 +427,8 @@ export NVM_DIR="$HOME/.nvm";
 
 echo -e "${PRTY} Installing NodeJS 'v${METEOR_NODE_VERSION}'" | tee -a ${LOG};
 nvm install ${METEOR_NODE_VERSION};
+
+
 export NODE=$(which node);
 echo "NODE = ${NODE}";
 export NODE_DIR=${NODE%/bin/node};
@@ -732,17 +520,19 @@ echo -e "";
 exit 0;
 
 
+# echo -e "# #-----------------------------------------------------------";
+# # ls -l;
+# # ls -la ${NVM_DIR};
+# pwd;
+# hostname;
 
-# sudo -A rm -f  /etc/systemd/system/nginx.service;
-# sudo -A rm -f  /etc/systemd/system/todos.service;
-# # sudo -A rm -f  /etc/systemd/system/multi-user.target.wants/nginx.service;
-# sudo -A rm -f  /${DEPLOY_USER}/cache/artifacts/core-nginx-1.10.1-20160902203245-x86_64-linux.hart;
-# sudo -A rm -f  /${DEPLOY_USER}/cache/artifacts/fleetingclouds-todos-*.hart;
-# sudo -A rm -fr /${DEPLOY_USER}/pkgs/core/nginx;
-# sudo -A rm -fr /${DEPLOY_USER}/pkgs/fleetingclouds;
-# sudo -A rm -fr ${SVC_DIR}/nginx;
-# sudo -A rm -fr ${SVC_DIR}/todos;
-# sudo -A rm -fr /home/${DEPLOY_USER}/nginx;
+# CURTAIL && (
+#   echo -e "DeploymentPackageRunner Line # 492
 
-# sudo -A updatedb && locate nginx;
-# ----
+#    NGINX_VHOSTS_PUBLICATIONS=${NGINX_VHOSTS_PUBLICATIONS};
+
+#                * * *  CURTAILED * * * ";
+# ) && exit || (
+#   echo -e "             * * *  NOT curtailed - Start * * * ";
+# )
+# echo -e "# #-----------------------------------------------------------";

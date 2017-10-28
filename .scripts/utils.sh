@@ -115,24 +115,38 @@ function collectProvisioningParameters() {
   getParmFromJSON ".deploymentParametersIndexFile"  "PARMSFILE" "settings.json";
   echo "export PARMSFILE=${PARMSFILE}" ;
 
+  getParmFromJSON ".name"  "APP_NAME" "package.json";
+  echo "export APP_NAME=${APP_NAME}" ;
+
+  getParmFromJSON ".applications[\"${APP_NAME}\"].METEOR_NODE_VERSION" "METEOR_NODE_VERSION" "${PARMSFILE}";
+  echo "export METEOR_NODE_VERSION='${METEOR_NODE_VERSION}';" | tee -a ${ENVIRONMENT};
+
   getParmFromJSON ".standard.SSH_PATH" "SSH_PATH" "${PARMSFILE}";
   echo "export SSH_PATH=${SSH_PATH}";
+
+  getParmFromJSON ".standard.BUNDLE_DIRECTORY_NAME" "BUNDLE_DIRECTORY_NAME" "${PARMSFILE}";
+  echo "export BUNDLE_DIRECTORY_NAME=${BUNDLE_DIRECTORY_NAME}";
+
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].TARGET_SRVR" "TARGET_SRVR" "${PARMSFILE}";
   echo "export TARGET_SRVR=${TARGET_SRVR}";
 
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER" "DEPLOY_USER" "${PARMSFILE}";
-  echo "export DEPLOY_USER='${PRTYDPLY}';" | tee -a ${ENVIRONMENT};
+  echo "export DEPLOY_USER='${DEPLOY_USER}';" | tee -a ${ENVIRONMENT};
 
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].RDBMS_ROLE" "RDBMS_ROLE" "${PARMSFILE}";
   echo "export RDBMS_ROLE='${RDBMS_ROLE}';" | tee -a ${ENVIRONMENT};
 
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].adminUser.DEPLOY_USER_SSH_KEY_COMMENT" "DEPLOY_USER_SSH_KEY_COMMENT" "${PARMSFILE}";
   echo "export DEPLOY_USER_SSH_KEY_COMMENT=${DEPLOY_USER_SSH_KEY_COMMENT}";
+
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].SETUP_USER_UID" "SETUP_USER_UID" "${PARMSFILE}";
   echo "export SETUP_USER_UID=${SETUP_USER_UID}";
 
   getParmFromJSON ".standard.SECRETS_PATH" "SECRETS_PATH" "${PARMSFILE}";
   echo "export SECRETS_PATH=${SECRETS_PATH}";
+
+  getParmFromJSON ".standard.APP_DIRECTORY_NAME" "APP_DIRECTORY_NAME" "${PARMSFILE}";
+  echo "export APP_DIRECTORY_NAME='${APP_DIRECTORY_NAME}';" | tee -a ${ENVIRONMENT}
 
   getParmFromJSON ".standard.DEPLOY_USER_SECRETS_DIR" "DEPLOY_USER_SECRETS_DIR" "${PARMSFILE}";
   echo "export DEPLOY_USER_SECRETS_DIR=${DEPLOY_USER_SECRETS_DIR}";
@@ -154,6 +168,12 @@ function collectProvisioningParameters() {
 
   getParmFromJSON ".standard.YOUR_TARGET_SRVR_SSH_KEY_FILE" "YOUR_TARGET_SRVR_SSH_KEY_FILE" "${PARMSFILE}";
   echo "export YOUR_TARGET_SRVR_SSH_KEY_FILE=${YOUR_TARGET_SRVR_SSH_KEY_FILE}";
+
+  export HOST_SERVER_NAME="${VIRTUAL_HOST_DOMAIN_NAME}";
+  echo "export VIRTUAL_HOST_DOMAIN_NAME='${VIRTUAL_HOST_DOMAIN_NAME}';" | tee -a ${ENVIRONMENT};
+
+  export SECRETS="secrets.sh";
+  echo "export SECRETS='${SECRETS}';" | tee -a ${ENVIRONMENT};
 
   getParmFromJSON ".DEPLOY_USER_SSH_PASS_PHRASE" "DEPLOY_USER_SSH_PASS_PHRASE" "${VHOST_SECRETS_FILE}";
   echo "export DEPLOY_USER_SSH_PASS_PHRASE=${DEPLOY_USER_SSH_PASS_PHRASE}";
@@ -179,19 +199,51 @@ function collectProvisioningParameters() {
   getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
   echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
 
-  getParmFromJSON ".standard.SSH_CONF_FILE" "SSH_CONF_FILE" "${PARMSFILE}";
-  echo "export SSH_CONF_FILE=${SSH_CONF_FILE}";
-
   getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
   echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
 
 
-   echo -e "----
-       ${DEPLOY_USER_SSH_KEY_COMMENT}
-       ${DEPLOY_USER_SSH_PASS_PHRASE}
-       ${DEPLOY_USER_SSH_KEY_PATH}
-       ${DEPLOY_USER_SSH_KEY_FILE}
-     -----";
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_HST" "RDBMS_HST" "${PARMSFILE}";
+  echo "export RDBMS_HST='${RDBMS_HST}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_DIALECT" "RDBMS_DIALECT" "${PARMSFILE}";
+  echo "export RDBMS_DIALECT='${RDBMS_DIALECT}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_PORT" "RDBMS_PORT" "${PARMSFILE}";
+  echo "export RDBMS_PORT='${RDBMS_PORT}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_DB" "RDBMS_DB" "${PARMSFILE}";
+  echo "export RDBMS_DB='${RDBMS_DB}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_ROLE" "RDBMS_ROLE" "${PARMSFILE}";
+  echo "export RDBMS_ROLE='${RDBMS_ROLE}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_OWNER" "RDBMS_OWNER" "${PARMSFILE}";
+  echo "export RDBMS_OWNER='${RDBMS_OWNER}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_UID" "RDBMS_UID" "${PARMSFILE}";
+  echo "export RDBMS_UID='${RDBMS_UID}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_BKP" "RDBMS_BKP" "${PARMSFILE}";
+  echo "export RDBMS_BKP='${RDBMS_BKP}';" | tee -a ${ENVIRONMENT};
+
+
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].no_sql.NOSQLDB_HST" "NOSQLDB_HST" "${PARMSFILE}";
+  echo "export NOSQLDB_HST='${NOSQLDB_HST}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].no_sql.NOSQLDB_DIALECT" "NOSQLDB_DIALECT" "${PARMSFILE}";
+  echo "export NOSQLDB_DIALECT='${NOSQLDB_DIALECT}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].no_sql.NOSQLDB_PORT" "NOSQLDB_PORT" "${PARMSFILE}";
+  echo "export NOSQLDB_PORT='${NOSQLDB_PORT}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].no_sql.NOSQLDB_DB" "NOSQLDB_DB" "${PARMSFILE}";
+  echo "export NOSQLDB_DB='${NOSQLDB_DB}';" | tee -a ${ENVIRONMENT};
+
+  getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].no_sql.NOSQLDB_UID" "NOSQLDB_UID" "${PARMSFILE}";
+  echo "export NOSQLDB_UID='${NOSQLDB_UID}';" | tee -a ${ENVIRONMENT};
+
 
 };
 
@@ -216,13 +268,13 @@ function collectDeploymentParameters() {
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].YOUR_ORGANIZATION_NAME" "YOUR_ORGANIZATION_NAME" "${PARMSFILE}";
   echo "export YOUR_ORGANIZATION_NAME=${YOUR_ORGANIZATION_NAME}";
 
-  export HOST_SERVER_NAME="${VIRTUAL_HOST_DOMAIN_NAME}";
-
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].protocol.HOST_SERVER_PROTOCOL" "HOST_SERVER_PROTOCOL" "${PARMSFILE}";
   echo "export HOST_SERVER_PROTOCOL='${HOST_SERVER_PROTOCOL}';" | tee -a ${ENVIRONMENT};
 
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].protocol.HOST_SERVER_PORT" "HOST_SERVER_PORT" "${PARMSFILE}";
   echo "export HOST_SERVER_PORT='${HOST_SERVER_PORT}';" | tee -a ${ENVIRONMENT};
+
+
 
 };
 
