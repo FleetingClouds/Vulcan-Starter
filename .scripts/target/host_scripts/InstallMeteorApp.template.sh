@@ -9,7 +9,9 @@ source ./${BUNDLE_DIRECTORY_NAME}/environment.sh;
 echo -e "-------------> \${RDBMS_PWD}";
 echo -e "-------------> \${TARGET_SRVR}";
 
-sh ${BUNDLE_DIRECTORY_NAME}/settings.json.template.sh > settings.json;
+
+# sh ${BUNDLE_DIRECTORY_NAME}/settings.json.template.sh > settings.json;
+
 export METEOR_SETTINGS=\$( cat settings.json );
 rm -fr settings.json;
 export ESCAPED_METEOR_SETTINGS=\$(echo \${METEOR_SETTINGS}  | sed "s|'|\\\\\\'|g"  | sed "s|\\\\\\n|\\\\\\\\\\\\\\n|g" );

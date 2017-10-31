@@ -229,6 +229,9 @@ function installAndroid() {
 
   echo -e "------------------";
 
+  declare PKG="android-tools-adb";
+  dpkg-query -l ${PKG} &>/dev/null || sudo apt -y install ${PKG};
+
   declare PKG="gradle";
   dpkg-query -l ${PKG} &>/dev/null || sudo apt -y install ${PKG};
 

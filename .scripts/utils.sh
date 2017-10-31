@@ -118,6 +118,9 @@ function collectProvisioningParameters() {
   getParmFromJSON ".name"  "APP_NAME" "package.json";
   echo "export APP_NAME=${APP_NAME}" ;
 
+  getParmFromJSON ".version"  "PKG_VERSION" "package.json";
+  echo "export PKG_VERSION=${PKG_VERSION}" ;
+
   getParmFromJSON ".applications[\"${APP_NAME}\"].METEOR_NODE_VERSION" "METEOR_NODE_VERSION" "${PARMSFILE}";
   echo "export METEOR_NODE_VERSION='${METEOR_NODE_VERSION}';" | tee -a ${ENVIRONMENT};
 
@@ -201,6 +204,9 @@ function collectProvisioningParameters() {
 
   getParmFromJSON ".standard.DEPLOY_USER_SSH_KEY_PUBL" "DEPLOY_USER_SSH_KEY_PUBL" "${PARMSFILE}";
   echo "export DEPLOY_USER_SSH_KEY_PUBL=${DEPLOY_USER_SSH_KEY_PUBL}";
+
+  getParmFromJSON ".standard.METEOR_NODE_APP_PATH" "METEOR_NODE_APP_PATH" "${PARMSFILE}";
+  echo "export METEOR_NODE_APP_PATH='${METEOR_NODE_APP_PATH}';" | tee -a ${ENVIRONMENT};
 
 
   getParmFromJSON ".virtual_hosts[\"${VIRTUAL_HOST_DOMAIN_NAME}\"].sql.RDBMS_HST" "RDBMS_HST" "${PARMSFILE}";

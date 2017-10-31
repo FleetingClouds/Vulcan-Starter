@@ -134,25 +134,14 @@ set +e;
 
   pushd .${TARGET_SCRIPTS} >/dev/null;
 
-    echo -e "${PRTY} Secure CoPying '${APP_INSTALLER}.sh' to server.";
+    echo -e "${PRTY} Creating '${APP_INSTALLER}.sh' from '${APP_INSTALLER}.template.sh'.";
     sh ${APP_INSTALLER}.template.sh > ${APP_INSTALLER}.sh;
     chmod a+x ${APP_INSTALLER}.sh;
 
-echo -e "# #-----------------------------------------------------------";
-# ls -l;
-# ls -la ${NVM_DIR};
-pwd;
-hostname;
+    echo -e "${PRTY} Secure CoPying '${PROJECTPATH}/settings.json' to server.";
+    scp ${PROJECTPATH}/settings.json ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER};
 
-CURTAIL && (
-  echo -e "DeployAppBundleToHost Line # 147
-
-               * * *  CURTAILED * * * ";
-) && exit || (
-  echo -e "             * * *  NOT curtailed - Start * * * ";
-)
-echo -e "# #-----------------------------------------------------------";
-
+    echo -e "${PRTY} Secure CoPying '${APP_INSTALLER}.sh' to server.";
     scp ${APP_INSTALLER}.sh ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/${BUNDLE_DIRECTORY_NAME};
     rm -fr ${APP_INSTALLER}.sh;
 
@@ -162,10 +151,6 @@ echo -e "# #-----------------------------------------------------------";
   # ssh ${DEPLOY_USER}@${TARGET_SRVR} ". .bash_login; nvm use --delete-prefix v4.8.3 --silent";
   ssh ${DEPLOY_USER}@${TARGET_SRVR} ". .bash_login && ./${BUNDLE_DIRECTORY_NAME}/${APP_INSTALLER}.sh";
 
-
-  echo -e "${PRTY}   All done.
-  ..................................................................
-  ";
 }
 
 
@@ -175,12 +160,20 @@ echo -e "# #-----------------------------------------------------------";
 #   echo -e "done ...";
 # popd >/dev/null;
 
+# echo -e "# #-----------------------------------------------------------";
+# # ls -l;
+# # ls -la ${NVM_DIR};
+# pwd;
+# hostname;
 
-#   CURTAIL && (
-#     echo -e "             * * *  CURTAILED * * * ";
-#   ) && exit || (
-#     echo -e "             * * *  NOT curtailed - Start * * * ";
-#   )
+# CURTAIL && (
+#   echo -e "DeployAppBundleToHost Line # 147
+
+#                * * *  CURTAILED * * * ";
+# ) && exit || (
+#   echo -e "            * * *  NOT curtailed - Start * * * ";
+# )
+# echo -e "# #-----------------------------------------------------------";
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ -z ${1} ]]; then
