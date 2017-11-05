@@ -1,5 +1,5 @@
 Package.describe({
-  name: "example-forum",
+  name: "my-example-forum",
   summary: "Vulcan forum package",
   version: '1.8.0',
   git: "https://github.com/VulcanJS/Vulcan.git"
@@ -21,7 +21,6 @@ Package.onUse(function (api) {
     'vulcan:accounts@1.8.0',
     'vulcan:email',
     'vulcan:forms',
-    'vulcan:newsletter',
     'vulcan:events',
     'vulcan:embed',
 
@@ -48,9 +47,6 @@ Package.onUse(function (api) {
     'lib/server/email/templates/posts/postApproved.handlebars',
     'lib/server/email/templates/users/accountApproved.handlebars',
     'lib/server/email/templates/users/newUser.handlebars',
-    'lib/server/email/templates/newsletter/newsletter.handlebars',
-    'lib/server/email/templates/newsletter/newsletterConfirmation.handlebars',
-    'lib/server/email/templates/newsletter/postItem.handlebars',
     
   ], ['server']);
 

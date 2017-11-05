@@ -318,15 +318,6 @@ const schema = {
     },
   },
 
-  /**
-    Used to keep track of when a post has been included in a newsletter
-  */
-  scheduledAt: {
-    type: Date,
-    optional: true,
-    viewableBy: ['admins'],
-  },
-
   // GraphQL-only fields
 
   domain: {
