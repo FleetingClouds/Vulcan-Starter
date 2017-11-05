@@ -8,5 +8,4 @@ import './helpers.js';
 import './permissions.js';
 import './redux.js';
 import './admin.js';
-import './newsletter.js';
 import './embedly.js';
