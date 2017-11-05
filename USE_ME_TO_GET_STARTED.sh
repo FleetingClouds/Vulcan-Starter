@@ -2,13 +2,13 @@
 #
 export TRUE=true;  export FALSE=false;
 
-
 # Specify where things should go
 export PROJECTS_DIRECTORY="${HOME}/projects";      # The installation path for your new project
 export VULCAN_HOME="${PROJECTS_DIRECTORY}/Vulcan"; # The path to the root of your Vulcan installation
 
 export YOUR_ORG="";                                # The GitHub organization name to use
 export YOUR_REPO="";                               # The GitHub repo name to use
+export YOUR_REPO_BRANCH="";                        # The GitHub repo BRANCH to use
 export NEW_PROJECT_NAME="";                        # A name for your new project
 
 export USE_ORIGINAL=${TRUE};
@@ -17,12 +17,16 @@ if [[ ${USE_ORIGINAL} == ${TRUE} ]]; then
 
   YOUR_ORG="VulcanJS";
   YOUR_REPO="Vulcan-Starter";
+  YOUR_REPO_BRANCH="master";
+
   NEW_PROJECT_NAME="starter";
 
 else
 
   YOUR_ORG="FleetingClouds";
   YOUR_REPO="YourPublic";
+  YOUR_REPO_BRANCH="server_setup";
+
   NEW_PROJECT_NAME="yourpublic";
 
 fi;
@@ -105,6 +109,8 @@ git clone git@github.com:${YOUR_ORG}/${YOUR_REPO}.git ${NEW_PROJECT_NAME};
 
   # Step in your project folder
   pushd ${NEW_PROJECT_NAME};
+
+    git checkout ${YOUR_REPO_BRANCH};
 
     # Make sure your app uses the same Meteor release as Vulcan
     cp ${VULCAN_HOME}/.meteor/release ./.meteor;
