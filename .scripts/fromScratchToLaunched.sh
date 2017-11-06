@@ -14,6 +14,10 @@ if [ -z ${1} ]; then
   Must specify a remote virtual host URL. Eg; yoursite.yourpublic.work";
   exit 1;
 else
+
+  sudo tlsdate -H mail.google.com
+
   ${SCRIPTPATH}/target/PrepareTargetHost.sh  ${1};
   ${SCRIPTPATH}/target/DeployAppBundleToHost.sh  ${1};
+
 fi;

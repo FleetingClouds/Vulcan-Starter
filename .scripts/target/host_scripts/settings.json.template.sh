@@ -2,28 +2,43 @@
 #
 cat <<EOF
 {
-  "HOST_SERVER_NAME": "localhost:3000",
-  "MAILGUN_DOMAIN": "${MAILGUN_DOMAIN}",
-  "MAILGUN_KEY": "${MAILGUN_KEY}",
-  "LOGGLY_SUBDOMAIN": "${LOGGLY_SUBDOMAIN}",
-  "LOGGLY_TOKEN": "${LOGGLY_TOKEN}",
-
-  "RDBMS_BKP": "${RDBMS_BKP}",
-  "RDBMS_DB": "${RDBMS_DB}",
-  "RDBMS_DIALECT": "${RDBMS_DIALECT}",
-  "RDBMS_HST": "${RDBMS_HST}",
-  "RDBMS_PWD": "${RDBMS_PWD}",
-  "RDBMS_UID": "${RDBMS_UID}",
   "public": {
-    "IS_GITSUBMODULE":"${IS_GITSUBMODULE}",
-    "PASSWORD_RESET": {
-      "Route": "/prrq/",
-      "Html_1": "<b>If you did not request a password reset just ignore this.</b><br /><b>If you did request it, then please click <a href='http://",
-      "Html_2": "'>this link</a> to open your password reset page.",
-      "Text_1": "If you did not request a password reset just ignore this.\nIf you did request it, then please go to http://",
-      "Text_2": " in order to reset your password.",
-      "Subject": "Your Mantra Kickstarter password reset request",
-      "From": "yourself@yourpublic.work"
+
+    "title": "Your site title",
+    "tagline":"Your site tagline",
+
+    "logoUrl": "https://placekitten.com/250/80",
+    "logoHeight": "80",
+    "logoWidth": "250",
+    "faviconUrl": "/favicon.ico",
+
+    "language": "en",
+    "locale": "en",
+
+    "twitterAccount": "foo",
+    "facebookPage": "http://facebook.com/foo",
+
+    "googleAnalyticsId":"123foo"
+
+  },
+
+  "defaultEmail": "hello@world.com",
+  "mailUrl": "smtp://username%40yourdomain.mailgun.org:yourpassword123@smtp.mailgun.org:587/",
+
+  "deploymentParametersIndexFile": "${HOME}/.vulcan/index.json",
+
+  "oAuth": {
+    "google": {
+      "clientId": "${GOOGLE_CLIENT_ID}",
+      "secret": "${GOOGLE_CLIENT_SECRET}"
+    },
+    "twitter": {
+      "consumerKey": "${TWITTER_CONSUMER_KEY}",
+      "secret": "${TWITTER_SECRET}"
+    },
+    "facebook": {
+      "appId": "${FACEBOOK_APP_ID}",
+      "secret": "${FACEBOOK_APP_SECRET}"
     }
   }
 }

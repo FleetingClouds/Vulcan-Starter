@@ -86,6 +86,11 @@ export ENVIRONMENT="environment.sh";
 echo -e "Meteor App Deployment Preparation Log :: $(date)
 =======================================================" > ${LOG};
 
+echo -e "${PRTY} Fix clock.  "  | tee -a ${LOG};
+APKG="tlsdate"; dpkg -s ${APKG} >/dev/null \
+    || sudo -A DEBIAN_FRONTEND=noninteractive  apt-get install -y ${APKG} >>  ${LOG};
+sudo -A tlsdate -H mail.google.com
+
 echo -e "${PRTY} Suppress spurious 'mdadm' warning.  "  | tee -a ${LOG};
 grep "ARRAY devices" /etc/mdadm/mdadm.conf >/dev/null \
   || echo "ARRAY devices=/dev/null" | sudo -A tee -a /etc/mdadm/mdadm.conf >/dev/null;

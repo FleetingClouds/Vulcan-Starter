@@ -30,7 +30,7 @@ This directory contains two folders to copy to your ${HOME} directory ...
 
 The file ```.vulcan/index.json``` contains public knowledge parameters to be used by the continuous deployment scripts.  Some of those parameters are pointers to secret parameters files kept in ```.ssh/deploy_vault```.
 
-So, executing ```./USE_ME_TO_GET_STARTED.sh yoursite.yourpublic.work``` will cause the scripts to access the ```.vulcan/index.json``` file in the section ```.virtual_hosts.'yoursite.yourpublic.work'.DEPLOY_VAULT``` in order to find the relevant secrets for that target virtual host.
+So, executing ```./.scripts/fromScratchToLaunched.sh yoursite.yourpublic.work``` will cause the scripts to access the ```.vulcan/index.json``` file in the section ```.virtual_hosts.'yoursite.yourpublic.work'.DEPLOY_VAULT``` in order to find the relevant secrets for that target virtual host.
 
 Likewise, reading ```./package.json``` --> ```.name``` the scripts will be directed to the section ```.applications.yourpublic```.
 

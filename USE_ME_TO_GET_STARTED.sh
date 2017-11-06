@@ -140,6 +140,7 @@ cd ${PROJECTS_DIRECTORY}/${NEW_PROJECT_NAME};
 echo -e \"Starting app with packages from '\${METEOR_PACKAGE_DIRS}'\";
 meteor reset;
 meteor --port 3000 --settings settings.json;
+
     ";
   popd;
 popd;

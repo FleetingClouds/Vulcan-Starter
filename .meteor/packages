@@ -1,6 +1,7 @@
 # see http://docs.vulcanjs.org/packages
 
 vulcan:core
+# vulcan:admin
 
 ############ Language Packages ############
 
@@ -8,8 +9,9 @@ vulcan:i18n-en-us
 
 ############ Accounts Packages ############
 
-accounts-password@1.4.0
-# accounts-twitter
+accounts-password
+accounts-twitter
+accounts-google
 # accounts-facebook
 
 ############ Your Packages ############

@@ -122,6 +122,7 @@ function getPlugin() {
     echo -e "Seem to have Plugin '#${1} at ${2}' already.";
   else
     if [[ "${METEOR_VERSION}" > "1.4.2.7" ]]; then
+      echo y | android update sdk --no-ui --all --filter "extra-google-m2repository"
       echo -e "\nGetting -- ${1} into ${2}";
       echo "y" | ${SDK_MANAGER} $1 >/dev/null;
       echo -e "Installed -- ${1}";
@@ -217,9 +218,9 @@ function installAndroid() {
 
   mkdir -p ${ANDROID_LICENSES};
   echo -e "
-
-8933bad161af4178b1185d1a37fbf41ea5269c55" > ${SDK_LICENSE};
-
+8933bad161af4178b1185d1a37fbf41ea5269c55
+d56f5187479451eabf01fb78af6dfcb131a6481e
+" > ${SDK_LICENSE};
 
   getPlugin "${SDK_PLATFORM_TOOLS}" ${ANDROID_HOME}/platform-tools/adb;
 

@@ -29,6 +29,11 @@
       "RDBMS_ROLE": "meteor_app",
       "YOUR_ORGANIZATION_NAME": "Your Org",
       "YOUR_FULLNAME": "You Yourself",
+      "accounts": {
+        "GOOGLE_CLIENT_ID": "4515........-............................as11.apps.googleusercontent.com",
+        "TWITTER_CONSUMER_KEY": "VR1F.................qLQA",
+        "FACEBOOK_APP_ID": "2754.......3547",
+      },
       "protocol": {
         "HOST_SERVER_PROTOCOL": "https",
         "HOST_SERVER_PORT": "443"

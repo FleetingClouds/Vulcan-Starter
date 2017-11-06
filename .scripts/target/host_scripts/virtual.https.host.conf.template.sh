@@ -67,13 +67,6 @@ server {
 
     add_header X-Frame-Options SAMEORIGIN;
     add_header X-Content-Type-Options nosniff;
-    add_header Content-Security-Policy "
-      img-src 'self' https://cdn.sstatic.net/Sites/stackoverflow/img/apple-touch-icon@2.png https://secure.gravatar.com/avatar/ https://placekitten.com/250/80 https$
-      script-src 'self' https://www.google-analytics.com/analytics.js 'sha256-OcSW+L/yiphj08nHYgqsWmsyWitJycY4apXMdFBkluE=';
-      style-src 'self' 'sha256-V/5gtfFTrbXjFQhinaeC2OJcdlz1VZAiL32eUdQ2wQA=' 'sha256-//3VLAhlL5VTo6oTJVHkyYmfyPgMkdUtCoy7Cky3yc4=' https://maxcdn.bootstrapcdn.com/b$
-      child-src 'none';
-      object-src 'none';
-    ";
 
     add_header X-XSS-Protection "1; mode=block";
 

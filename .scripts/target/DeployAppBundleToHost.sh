@@ -102,6 +102,8 @@ set +e;
       echo -e "${PRTY} Installing Node dependencies";
       meteor npm install;
 
+      sh .${TARGET_SCRIPTS}/settings.json.template.sh > settings.json;
+
 
       echo -e "${PRTY} Building AndroidAPK as ${APP_NAME}";
       BuildAndroidAPK;
@@ -138,8 +140,8 @@ set +e;
     sh ${APP_INSTALLER}.template.sh > ${APP_INSTALLER}.sh;
     chmod a+x ${APP_INSTALLER}.sh;
 
-    echo -e "${PRTY} Secure CoPying '${PROJECTPATH}/settings.json' to server.";
-    scp ${PROJECTPATH}/settings.json ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER};
+    echo -e "${PRTY} Secure CoPying 'settings.json.template.sh' to server.";
+    scp settings.json.template.sh ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/${BUNDLE_DIRECTORY_NAME};
 
     echo -e "${PRTY} Secure CoPying '${APP_INSTALLER}.sh' to server.";
     scp ${APP_INSTALLER}.sh ${DEPLOY_USER}@${TARGET_SRVR}:/home/${DEPLOY_USER}/${BUNDLE_DIRECTORY_NAME};
@@ -161,19 +163,28 @@ set +e;
 # popd >/dev/null;
 
 # echo -e "# #-----------------------------------------------------------";
-# # ls -l;
+# ls -la;
+# cat settings.json
 # # ls -la ${NVM_DIR};
 # pwd;
+# whoami;
 # hostname;
 
 # CURTAIL && (
-#   echo -e "DeployAppBundleToHost Line # 147
+#   echo -e "DeployAppBundleToHost Line # 150
+
+#   GOOGLE_CLIENT_ID = ${GOOGLE_CLIENT_ID}
+#   TWITTER_CONSUMER_KEY = ${TWITTER_CONSUMER_KEY}
+
+#   GOOGLE_CLIENT_SECRET = ${GOOGLE_CLIENT_SECRET}
+#   TWITTER_SECRET = ${TWITTER_SECRET}
 
 #                * * *  CURTAILED * * * ";
 # ) && exit || (
 #   echo -e "            * * *  NOT curtailed - Start * * * ";
 # )
 # echo -e "# #-----------------------------------------------------------";
+
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ -z ${1} ]]; then
