@@ -54,6 +54,8 @@ pushd ${PROJECTS_DIRECTORY};
   dpkg -s ${PKG} >/dev/null ||  sudo apt install -y ${PKG}; # Need C++ build tools for fast bcrypt installation
   PKG="curl";
   dpkg -s ${PKG} >/dev/null ||  sudo apt install -y ${PKG}; # Need curl to get the other stuff.
+  PKG="httping";
+  dpkg -s ${PKG} >/dev/null ||  sudo apt install -y ${PKG}; # Need curl to get the other stuff.
 
   # Install 'meteor' IF NECESSARY
   meteor --version || curl https://install.meteor.com/ | sh;

@@ -94,6 +94,7 @@ function getParmFromJSON() {
   declare PARM=${1};
   declare RETURN_VAR=${2};
   declare PARMS_FILE_PATH=${3};
+#  echo "declare RESULT=jq ${PARM} -rMc ${PARMS_FILE_PATH}";
   declare RESULT=$(jq ${PARM} -rMc ${PARMS_FILE_PATH});
   # declare RSLT=$(jq ${PARM} -rMc ${PARMS_FILE_PATH});
   # declare RESULT=$(eval echo ${RSLT})
@@ -298,12 +299,35 @@ function collectDeploymentParameters() {
 };
 
 
-function collectBuildSecrets() {
+function collectJSONkeys() {
 
-  getParmFromJSON ".KEYSTORE_PWD" "KEYSTORE_PWD" "${VHOST_SECRETS_FILE}";
-  echo "export KEYSTORE_PWD=${KEYSTORE_PWD}";
+  [ -z $1 ] && echo -e "Usage : ${0} JSON_FILE QUERY_PATH";
+  declare JSON_FILE="${1}";
+  shift;
+  [ -z $1 ] && echo -e "Usage : ${0} JSON_FILE QUERY_PATH";
+  declare QUERY_PATH="${1}";
+  shift;
+  declare SHOW="${1}";
 
+  for II in $( jq -r "${QUERY_PATH} | keys[]" ${JSON_FILE} ); do
+    QUERY_PATH=${QUERY_PATH%.}; # trim "." suffix if present.
+    getParmFromJSON "${QUERY_PATH}.${II}" "${II}" "${JSON_FILE}";
+    eval KEY='$'${II};
+    [[ ! -z ${SHOW} ]] && echo "export ${II}=${KEY}";
+  done;
 };
+
+
+# function collectBuildSecrets() {
+
+#   declare SECRETS_FILE=${HOME}/.ssh/deploy_vault/localhost/secrets.json;
+#   for II in $( jq -r '. | keys[]' ${HOME}/.ssh/deploy_vault/localhost/secrets.json ); do
+#     getParmFromJSON ".${II}" "${II}" "${VHOST_SECRETS_FILE}";
+#     eval KEY='$'${II};
+#     [[ ! -z $1 ]] && echo "export ${II}=${KEY}";
+#   done;
+
+# };
 
 
 function startSSHAgent() {
@@ -398,9 +422,12 @@ function UpdateEnvVars() {
 #   fi;
 
 
-
 # }
 
 # function haveUtils() {
 #   echo -e "Yes.  We sourced 'utils.js'";
 # }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  collectJSONkeys ${HOME}/.vulcan/index.json .standard. 'show';
+fi;
