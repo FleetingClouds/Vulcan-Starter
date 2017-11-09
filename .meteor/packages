@@ -1,7 +1,7 @@
 # see http://docs.vulcanjs.org/packages
 
 vulcan:core
-# vulcan:admin
+vulcan:admin
 
 ############ Language Packages ############
 
