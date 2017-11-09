@@ -66,9 +66,8 @@ sh .scripts/target/host_scripts/settings.json.template.sh > settings.json;
 
 export ROOT_URL=${HOST_SERVER_PROTOCOL}://${HOST_SERVER_NAME}:${HOST_SERVER_PORT};
 
-
-echo -e "
-export ROOT_URL=${ROOT_URL};
+echo -e "export ROOT_URL='${ROOT_URL}';
+export MONGO_URL='${MONGO_URL}'
 ${METEOR} run \
  --release ${RELEASE} \
  --settings=settings.json \
