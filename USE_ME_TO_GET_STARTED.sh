@@ -96,7 +96,7 @@ pushd ${PROJECTS_DIRECTORY};
         nohup meteor npm start > ./${START_LOG} &
 
         export IDX=2;  # 2 minutes
-        while printf "."; ! httping -qc1 http://localhost:3000 && ((IDX-- > 0));
+        while printf "."; ! httping -q -G -c1 http://localhost:3000 && ((IDX-- > 0));
         do
           sleep 6;
         done;
