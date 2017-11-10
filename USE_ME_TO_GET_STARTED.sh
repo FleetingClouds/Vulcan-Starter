@@ -82,9 +82,9 @@ pushd ${PROJECTS_DIRECTORY};
   git clone git@github.com:VulcanJS/Vulcan.git &>/dev/null;
 
   # install and pre-cache all of Vulcan's NodeJS dependencies
-  export START_LOG="./VulcanStartup.log";
-  if [[ -f ${VULCAN_HOME}/${START_LOG} ]]; then
-    echo -e "Found start up log '${VULCAN_HOME}/${START_LOG}'. Won't repeat.";
+  export START_LOG="/dev/shm/vulcan/VulcanStartup.log";
+  if [[ -f ${START_LOG} ]]; then
+    echo -e "Found start up log '${START_LOG}'. Won't repeat.";
   else
     pushd ${VULCAN_HOME};
 
@@ -93,7 +93,7 @@ pushd ${PROJECTS_DIRECTORY};
 
         echo -e "${PRETTY} Starting VulcanJS in background ...";
         meteor reset;
-        nohup meteor npm start > ./${START_LOG} &
+        nohup meteor npm start > ${START_LOG} &
 
         export IDX=2;  # 2 minutes
         while printf "."; ! httping -q -G -c1 http://localhost:3000 && ((IDX-- > 0));

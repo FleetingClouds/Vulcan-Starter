@@ -39,9 +39,11 @@ collectJSONkeys ${PARMS_FILE} "${HOST_SERVER_PARMS}.protocol"; # show;
 declare METEOR="${METEOR_CMD:-meteor}";
 declare LOGS_DIR="${CIRCLE_ARTIFACTS:-/var/log/meteor}";
 echo -e "Will write logs to : ${LOGS_DIR}";
-sudo mkdir -p ${LOGS_DIR};
-sudo chown $(whoami):$(whoami) ${LOGS_DIR};
-sudo chmod +rwx ${LOGS_DIR};
+if [[  ! -w ${LOGS_DIR}  ]]; then
+  sudo mkdir -p ${LOGS_DIR};
+  sudo chown $(whoami):$(whoami) ${LOGS_DIR};
+  sudo chmod +rwx ${LOGS_DIR};
+fi;
 #
 export RELEASE=$(cat ${PROJECT_ROOT}/.meteor/release | cut -d "@" -f 2);
 export ANAME=$(cat package.json | jq -r .name);
@@ -62,6 +64,11 @@ connection: {
 }
 ";
 
+declare PKS_DIR_MIN_SIZE=150000;
+declare PKS_DIR="node_modules";
+mkdir -p ${PKS_DIR};
+[[ $(du -s ${PKS_DIR} | cut -f1) -lt ${PKS_DIR_MIN_SIZE} ]] && meteor npm install;
+
 sh .scripts/target/host_scripts/settings.json.template.sh > settings.json;
 
 export ROOT_URL=${HOST_SERVER_PROTOCOL}://${HOST_SERVER_NAME}:${HOST_SERVER_PORT};
@@ -69,6 +76,7 @@ export ROOT_URL=${HOST_SERVER_PROTOCOL}://${HOST_SERVER_NAME}:${HOST_SERVER_PORT
 echo -e "export ROOT_URL='${ROOT_URL}';
 export MONGO_URL='${MONGO_URL}'
 ${METEOR} run \
+ --port ${HOST_SERVER_PORT} \
  --release ${RELEASE} \
  --settings=settings.json \
  2>&1 | tee -a ${LOGS_DIR}/${APP_NAME}.log;"
@@ -83,11 +91,12 @@ else
   If you find you get stuck at
        'Starting your app...'
   then append 'reset' to the command to clear the problem: Eg.,
-       .scripts/startInProdMode.sh reset
+       ./startInProdMode.sh reset
   ";
 fi;
 
 ${METEOR} run \
+    --port ${HOST_SERVER_PORT} \
     --release ${RELEASE} \
     --settings=settings.json \
    2>&1 | tee -a ${LOGS_DIR}/${APP_NAME}.log;
