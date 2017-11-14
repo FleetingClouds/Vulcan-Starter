@@ -6,37 +6,28 @@ Wrapped with the "withCurrentUser" container.
 */
 
 import React from 'react';
-// import { Components, registerComponent, withDocument } from 'meteor/vulcan:core';
 import { Components, registerComponent } from 'meteor/vulcan:core';
-import { withRouter } from 'react-router';
 
 import Movies from '../../modules/movies/collection.js';
 
-const MoviesItem = ({  loading, router  }) => {
+const MoviesItem = ({movie, currentUser}) =>
 
-  if (loading) {
+  <div style={{paddingBottom: "15px",marginBottom: "15px", borderBottom: "1px solid #ccc"}}>
 
-    console.log("Loading.....");
-    return <div className="movies-item"><Components.Loading/></div>
+    {/* document properties */}
 
-  } else {
+    <h4>{movie.name} ({movie.year})</h4>
+    <p>{movie.review} – {movie.user && movie.user.displayName}</p>
 
-    var movie = Movies.find({ name: router.location.query.name }).fetch()[0];
-    console.log('...............');
-    console.log(  movie.review );
-    console.log('...............');
-    return (
-      <div>
-        <div>{ router.location.query.name }</div>
-        Name.  { movie.name }<br/>
-        Year.  { movie.year }<br/>
-        Review.  { movie.review }<br/>
-      </div>
+    {/* edit document form */}
 
-    );
-  }
-}
+    {Movies.options.mutations.edit.check(currentUser, movie) ?
+      <Components.ModalTrigger label="Edit Movie">
+        <Components.MoviesEditForm currentUser={currentUser} documentId={movie._id} />
+      </Components.ModalTrigger>
+      : null
+    }
 
+  </div>
 
-registerComponent('MoviesItem', withRouter(MoviesItem));
-// registerComponent('MoviesItem', withRouter(MoviesItem), [withDocument]);
+registerComponent('MoviesItem', MoviesItem);
