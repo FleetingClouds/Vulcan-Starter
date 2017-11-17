@@ -26,9 +26,16 @@ const resolvers = {
     
     name: 'moviesSingle',
 
-    resolver(root, {documentId}, context) {
-      const document = context.Movies.findOne({_id: documentId});
-      return context.Users.restrictViewableFields(context.currentUser, context.Movies, document);
+    resolver(root, parms, context) {
+      const {documentId, slug} = parms;
+
+      return context.Users.restrictViewableFields(
+        context.currentUser,
+        context.Movies,
+        slug
+          ? context.Movies.findOne(JSON.parse(slug))
+          : context.Movies.findOne({_id: documentId})
+      );
     },
   
   },

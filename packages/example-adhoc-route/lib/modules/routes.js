@@ -1,4 +1,5 @@
 import { addRoute } from 'meteor/vulcan:core';
 
 addRoute({ name: 'movies', path: '/', componentName: 'MoviesList' });
-addRoute({ name: 'movie', path: '/movie', componentName: 'MoviesItem' });
+addRoute({ name: 'movies.single', path: 'movie/:slug', componentName: 'MoviesGet' });
+addRoute({ name: 'movies.adhoc', path: 'movie', componentName: 'MoviesAdhoc' });

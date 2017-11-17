@@ -3,6 +3,8 @@
 A SimpleSchema-compatible JSON schema
 
 */
+import { Utils } from 'meteor/vulcan:core';
+import Movies from '../../modules/movies/collection.js';
 
 const schema = {
 
@@ -52,6 +54,25 @@ const schema = {
     viewableBy: ['guests'],
     insertableBy: ['members'],
     editableBy: ['members'],
+  },
+  slug: {
+    type: String,
+    optional: true,
+    viewableBy: ['guests'],
+    insertableBy: ['members'],
+    editableBy: ['members'],
+    onInsert: movie => {
+      // if no slug has been provided, generate one
+      const slug = movie.slug || Utils.slugify(movie.name);
+      return Utils.getUnusedSlug(Movies, slug);
+    },
+    onEdit: (modifier, movie) => {
+      // if slug is changing
+      if (modifier.$set && modifier.$set.slug && modifier.$set.slug !== movie.slug) {
+        const slug = modifier.$set.slug;
+        return Utils.getUnusedSlug(Movies, slug);
+      }
+    }
   },
   review: {
     label: 'Review',
