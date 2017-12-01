@@ -23,7 +23,7 @@ const resolvers = {
   },
 
   single: {
-    
+
     name: 'moviesSingle',
 
     resolver(root, parms, context) {
@@ -37,18 +37,18 @@ const resolvers = {
           : context.Movies.findOne({_id: documentId})
       );
     },
-  
+
   },
 
   total: {
-    
+
     name: 'moviesTotal',
-    
+
     async resolver(root, {terms = {}}, context) {
       const {selector, options} = await context.Movies.getParameters(terms, {}, context.currentUser);
       return context.Movies.find(selector, options).count();
     },
-  
+
   }
 };
 

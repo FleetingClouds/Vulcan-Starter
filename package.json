@@ -6,7 +6,7 @@
   },
   "scripts": {
     "start": "meteor --settings settings.json",
-    "debug": "meteor debug --settings settings.json",
+    "debug": "meteor --inspect --settings settings.json",
     "lint": "eslint --cache --ext .jsx,js packages"
   },
   "dependencies": {
