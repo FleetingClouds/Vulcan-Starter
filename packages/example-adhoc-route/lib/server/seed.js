@@ -7,7 +7,7 @@ Seed the database with some dummy content.
 import Movies from '../modules/movies/collection.js';
 import Users from 'meteor/vulcan:users';
 import { newMutation } from 'meteor/vulcan:core';
-
+import models from './models';
 import seed from './seed.json';
 
 const CL = console.log;
@@ -33,6 +33,8 @@ var createDummyUsers = function () {
 };
 
 Meteor.startup(function () {
+
+  models.moofie.controller.seed();
 
   if (Users.find().fetch().length === 0) {
     createDummyUsers();
