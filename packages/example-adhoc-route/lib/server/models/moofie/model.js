@@ -1,8 +1,14 @@
 /* jshint indent: 2 */
-import { NAME, Name, name } from './index';
 
-export default (db, DataTypes) => {
-  return db.define(name, {
+import { sequelize as sqlz } from '../../db_connectors';
+
+let modelName = { t: 'Moofie' };
+modelName.u = modelName.t.toUpperCase();
+modelName.l = modelName.t.toLowerCase();
+
+const model = (sqlz, DataTypes) => {
+
+  return sqlz.define(modelName.l, {
     _id: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false,
@@ -32,23 +38,25 @@ export default (db, DataTypes) => {
     createdAt: {
       type: DataTypes.TIME,
       allowNull: false,
-      defaultValue: db.literal('CURRENT_TIMESTAMP')
+      defaultValue: sqlz.literal('CURRENT_TIMESTAMP')
     },
     updatedAt: {
       type: DataTypes.TIME,
       allowNull: false,
-      defaultValue: db.literal('CURRENT_TIMESTAMP')
+      defaultValue: sqlz.literal('CURRENT_TIMESTAMP')
     },
     deletedAt: {
       type: DataTypes.TIME,
       allowNull: false,
-      defaultValue: db.literal('CURRENT_TIMESTAMP')
+      defaultValue: sqlz.literal('CURRENT_TIMESTAMP')
     },
     deleted: {
       type: DataTypes.INTEGER(1),
       allowNull: true
     }
   }, {
-    tableName: name
+    tableName: modelName.l
   });
 };
+
+export { modelName, model };
