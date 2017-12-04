@@ -17,13 +17,15 @@ console.log('Within %s \nMoofie ormKit :: ', module.id, models.moofie.ormKit);
 
 const Moofies = createCollection({
 
+  generateGraphQLSchema: false,
+
   collectionName: 'Moofies',
 
   typeName: 'Moofie',
 
   schema,
 
-  ormKit: models.moofie.ormKit,
+  // ormKit: models.moofie.ormKit,
 
   // resolvers,
 

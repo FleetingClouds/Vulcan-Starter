@@ -1,6 +1,7 @@
 'use strict';
 
-import Sequelize from 'sequelize';
+// import Sequelize from 'sequelize';
+import Sequelize from 'synquelize';
 
 const sequelize = new Sequelize(
   'examples',
@@ -13,16 +14,7 @@ const sequelize = new Sequelize(
   },
 );
 
-
-sequelize.authenticate()
-.then(function(err) {
-    console.log(' Database connection established successfully.');
-  }, function (err) {
-    console.log(' Unable to connect to the database:', err);
-  }
-);
-
-
+sequelize.authenticate();
 
 const sanityCheck = (table, label, attribute, row) => {
 
