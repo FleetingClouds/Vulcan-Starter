@@ -1,7 +1,9 @@
 'use strict';
 
-// import Sequelize from 'sequelize';
-import Sequelize from 'synquelize';
+import Sequelize from 'sequelize';
+
+const LG = (msg) => console.log('Within %s...\n  |%s', module.id, msg);
+const MRK = (chr, cnt) => console.log(chr.repeat(cnt));
 
 const sequelize = new Sequelize(
   'examples',

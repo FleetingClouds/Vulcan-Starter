@@ -3,10 +3,18 @@ import { sequelize as sqlz } from '../../db_connectors';
 import { modelName, model } from './model';
 import seeds from './seeds.json';
 
+const LG = (msg) => console.log('Within %s...\n  |%s', module.id, msg);
+const MRK = (chr, cnt) => console.log(chr.repeat(cnt));
+
+
 const collection = sqlz.import(modelName.l, model);
 collection.sync();
 
-// console.log(' Within %s == this\n', module.id, this);
+  // MRK('%', 10);
+  // console.log(sqlz);
+  // MRK('-', 10);
+  // console.log(collection.findAndCountAll({}));
+  // MRK('=', 10);
 
 const controller = {
   /* eslint-disable no-console */
@@ -15,17 +23,24 @@ const controller = {
 
   seed: () => {
 
-    let rslt = collection.findAndCountAll({});
-    if ( rslt.count < 1 ) {
-      console.log('<|| creating dummy moofies ||>');
-      seeds.data.forEach( document => {
-        console.log(' Create :: ', document);
-        controller.create( null, document );
-      });
-    } else {
-      console.log(' Moofies seeded already.');
-    }
-
+    const rows = Promise.await(
+      collection.findAndCountAll({})
+      .then( rslt => {
+        let cnt = rslt.count;
+        if ( cnt < 1 ) {
+          console.log('<|| creating dummy moofies ||>');
+          seeds.data.forEach( document => {
+            console.log(' Create :: ', document);
+            controller.create( null, document );
+            cnt++;
+          });
+        } else {
+          console.log(' Moofies seeded already.');
+        }
+        return cnt;
+      })
+    );
+    console.log(' Rows :: ', rows);
   },
 
   findAndCountAll: (_, args) => {

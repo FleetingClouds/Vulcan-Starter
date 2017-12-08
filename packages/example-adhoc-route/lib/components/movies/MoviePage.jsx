@@ -2,7 +2,6 @@ import { Components, registerComponent, withDocument, withCurrentUser } from 'me
 import React from 'react';
 import { FormattedMessage } from 'meteor/vulcan:i18n';
 import Movies from '../../modules/movies/collection.js';
-import { Link } from 'react-router';
 
 const MoviePage = (props) => {
 
