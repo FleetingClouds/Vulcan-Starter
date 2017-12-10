@@ -9,12 +9,9 @@ import Moofies from '../modules/moofies/collection.js';
 
 import Users from 'meteor/vulcan:users';
 import { newMutation } from 'meteor/vulcan:core';
-import models from './models';
 import seed from './seed.json';
 
-const ctlrMoofies = models.moofie.controller;
-
-const LG = (msg) => console.log('Within %s...\n  | %s', module.id, msg);
+const LG = (ln, msg) => console.log('Within %s @ %s ...\n  | %s', module.id, ln, msg);
 const MRK = (chr, cnt) => console.log(chr.repeat(cnt));
 
 const createUser = function (username, email) {
@@ -38,21 +35,6 @@ var createDummyUsers = function () {
 };
 
 Meteor.startup(function () {
-
-  // MRK('=', 20);
-  // console.log(Movies);
-  // MRK('=', 10);
-  // console.log(Moofies);
-  // MRK('#', 20);
-
-  // if (Moofies.find().fetch().length === 0) {
-  //   console.log('// creating dummy moofies');
-  //   ctlrMoofies.seed();
-  // } else {
-  //   console.log(' Movies seeded already.');
-  // }
-
-  // ctlrMoofies.seed();
 
   if (Users.find().fetch().length === 0) {
     createDummyUsers();
@@ -78,10 +60,8 @@ Meteor.startup(function () {
     console.log(' Movies seeded already.');
   }
 
-
-
-  MRK('#  ', 20);
-
+  // MRK('  .  ', 20);
+  // LG(83, Moofies.find().fetch());
   if (Moofies.find().fetch().length < 5) {
     console.log('// creating dummy moofies');
     seed.data.forEach(document => {
@@ -97,8 +77,5 @@ Meteor.startup(function () {
   } else {
     console.log(' Moofies seeded already.');
   }
-
-  // console.log(Promise.await(x));
-  MRK('v', 40);
 
 });

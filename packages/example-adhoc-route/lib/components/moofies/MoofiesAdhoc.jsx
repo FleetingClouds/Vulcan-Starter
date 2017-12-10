@@ -6,7 +6,6 @@ const MoofiesAdhoc = (props, context) => {
   let adhoc=JSON.stringify(props.location.query);
   return <Components.MoofiePage slug={adhoc} />
 
-
 }
 
 

@@ -8,7 +8,8 @@ Three resolvers are defined:
 
 
 */
-const LG = (msg) => console.log('Within %s...\n  |%s', module.id, msg);
+const LG = (ln, msg) => console.log('Within %s @ %s ...\n  | %s', module.id, ln, msg);
+const MRK = (chr, cnt) => console.log(chr.repeat(cnt));
 
 // basic list, single, and total query resolvers
 const resolvers = {
@@ -30,16 +31,17 @@ const resolvers = {
 
     resolver(root, parms, context) {
       const {documentId, slug} = parms;
-      LG(slug);
-      LG('---------');
-      console.log(context.Moofies);
+      // LG(slug);
+      // LG('---------');
+
+      let parm = slug
+          ? JSON.parse(slug)
+          : {_id: documentId}
 
       return context.Users.restrictViewableFields(
         context.currentUser,
         context.Moofies,
-        slug
-          ? context.Moofies.findOne(JSON.parse(slug))
-          : context.Moofies.findOne({_id: documentId})
+        context.Moofies.findOne(parm).dataValues
       );
     },
 

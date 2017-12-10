@@ -24,7 +24,7 @@ fi;
 
 meteor npm install;
 
-rm -fr .meteor/local/build/programs/server/.example.sqlite;
+rm -fr /dev/shm/adhoc-route-example.sqlite;
 # meteor reset;
 
 # # echo -e "Debugging Meteor... in : ${BASE_NAME}";
